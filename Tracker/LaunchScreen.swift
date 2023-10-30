@@ -1,6 +1,8 @@
 import UIKit
 
 final class LaunchScreen: UIViewController {
+	// MARK: Private UI properties
+	
 	private var logoView: UIImageView = {
 		let logo = UIImage(named: "LauncScreenLogo")
 		let logoView = UIImageView(image: logo)
@@ -10,6 +12,8 @@ final class LaunchScreen: UIViewController {
 		
 		return logoView
 	}()
+	
+	// MARK: Lifecycle
 	
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -22,6 +26,8 @@ final class LaunchScreen: UIViewController {
 		navigateToTrackersViewController()
 	}
 	
+	// MARK: UI methods
+	
 	private func addLogo() {
 		view.addSubview(logoView)
 		NSLayoutConstraint.activate([
@@ -31,6 +37,8 @@ final class LaunchScreen: UIViewController {
 			logoView.heightAnchor.constraint(equalToConstant: 94)
 		])
 	}
+	
+	// MARK: Private methods
 	
 	private func navigateToTrackersViewController() {
 		guard let window = UIApplication.shared.windows.first else { fatalError("Invalid Configuration") }

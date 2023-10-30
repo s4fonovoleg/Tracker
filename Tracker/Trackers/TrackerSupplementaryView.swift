@@ -18,7 +18,10 @@ final class TrackerSupplementaryView: UICollectionReusableView {
 		super.init(frame: frame)
 		
 		addSubview(titleLabel)
-		
+		setupTitleLabelConstraints()
+	}
+	
+	private func setupTitleLabelConstraints() {
 		NSLayoutConstraint.activate([
 			titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
 			titleLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -6),

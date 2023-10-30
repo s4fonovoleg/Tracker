@@ -50,7 +50,6 @@ final class TrackersViewController: UIViewController, CreateTrackerDelegateProto
 		let searchField = UISearchTextField()
 		searchField.translatesAutoresizingMaskIntoConstraints = false
 		searchField.placeholder = "Поиск"
-		searchField.addTarget(self, action: #selector(searchFieldChanged), for: .editingChanged)
 		
 		return searchField
 	}()
@@ -130,6 +129,7 @@ final class TrackersViewController: UIViewController, CreateTrackerDelegateProto
 		searchField.delegate = self
 		
 		NSLayoutConstraint.activate([
+			searchField.heightAnchor.constraint(equalToConstant: 36),
 			searchField.topAnchor.constraint(equalTo: trackerLabel.bottomAnchor, constant: 16),
 			searchField.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 16),
 			searchField.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -16)
@@ -187,17 +187,16 @@ final class TrackersViewController: UIViewController, CreateTrackerDelegateProto
 		present(controller, animated: true)
 	}
 	
-	@objc private func searchFieldChanged(_ textField: UITextField) {
-		filterCategories()
-	}
-	
 	private func updateEmptyTrackersImage() {
 		emptyTrackersImageView.isHidden = !visibleCategories.isEmpty
 		emptyTrackersLabel.isHidden = !visibleCategories.isEmpty
 	}
 	
 	private func filterCategories() {
-		let date = datePicker.date
+		guard let date = datePicker.date.removeTime else {
+			return
+		}
+		
 		let weekDayNum = calendar.component(.weekday, from: date)
 		
 		guard let text = searchField.text,
@@ -224,6 +223,20 @@ final class TrackersViewController: UIViewController, CreateTrackerDelegateProto
 		
 		visibleCategories = filteredCategories
 		collectionView.reloadData()
+	}
+	
+	private func getNumberEnding(for num: Int, _ firstForm: String, _ secondForm: String, _ thirdFrom: String) -> String {
+		let lastNumber = num % 10
+		
+		if lastNumber == 0 || lastNumber > 4 {
+			return firstForm
+		}
+		
+		if lastNumber == 1 {
+			return secondForm
+		}
+		
+		return thirdFrom
 	}
 	
 	// MARK: Public methods
@@ -265,7 +278,7 @@ extension TrackersViewController: UICollectionViewDataSource {
 		let tracker = visibleCategories[indexPath.section].trackers[indexPath.row]
 		let completedTrackersOnDateCount = completedTrackers.filter { trackerRecord in
 			trackerRecord.trackerId == tracker.id &&
-			trackerRecord.date == datePicker.date
+			trackerRecord.date == datePicker.date.removeTime
 		}.count
 		
 		cell.delegate = self
@@ -291,11 +304,10 @@ extension TrackersViewController: UICollectionViewDataSource {
 
 extension TrackersViewController: TrackerViewCellDelegate {
 	func doneButtonDidTap(_ cell: TrackerViewCell) {
-		guard let tracker = cell.tracker else {
+		guard let tracker = cell.tracker,
+			  let date = datePicker.date.removeTime else {
 			return
 		}
-		
-		let date = datePicker.date
 		
 		if date > Date() {
 			return
@@ -365,41 +377,11 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
 	}
 }
 
+// MARK: UITextFieldDelegate
+
 extension TrackersViewController: UITextFieldDelegate {
-//	func textFieldDidEndEditing(_ textField: UITextField) {
-//
-//	}
-//
-//	func textFieldDidEndEditing(_ textField: UITextField, reason: UITextField.DidEndEditingReason) {
-//		let x = 42
-//	}
-//
-//	func textFieldDidBeginEditing(_ textField: UITextField) {
-//		guard let text = textField.text else {
-//			return
-//		}
-//
-//		if (text.isEmpty) {
-//			return
-//		}
-//
-//		var newCategories = [TrackerCategory]()
-//
-//		for category in categories {
-//			let visibleTrackers = category.trackers.filter { tracker in
-//				tracker.name.contains(text)
-//			}
-//
-//			if !visibleTrackers.isEmpty {
-//				let newCategory = TrackerCategory(
-//					name: category.name,
-//					trackers: []
-//				);
-//				newCategories.append(newCategory)
-//			}
-//		}
-//
-//		categories = newCategories
-//		collectionView.reloadData()
-//	}
+	func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+		filterCategories()
+		return true
+	}
 }

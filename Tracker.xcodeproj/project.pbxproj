@@ -11,10 +11,10 @@
 		F40A1C7C2ADDCCA90011D135 /* CreateTrackerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40A1C7B2ADDCCA90011D135 /* CreateTrackerViewController.swift */; };
 		F40A1C7E2ADF11F70011D135 /* CreateHabitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40A1C7D2ADF11F70011D135 /* CreateHabitViewController.swift */; };
 		F40A1C802AE05C650011D135 /* UITextFieldWithPadding.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40A1C7F2AE05C650011D135 /* UITextFieldWithPadding.swift */; };
-		F4AB8E532AED2C0A00C98B72 /* EndingHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4AB8E522AED2C0A00C98B72 /* EndingHelper.swift */; };
 		F4BCB7002AD8835400E9D094 /* LaunchScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4BCB6FF2AD8835400E9D094 /* LaunchScreen.swift */; };
 		F4BCB7032AD8846C00E9D094 /* UIColor+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4BCB7022AD8846C00E9D094 /* UIColor+Extension.swift */; };
 		F4BCB7052AD8901000E9D094 /* TrackersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4BCB7042AD8901000E9D094 /* TrackersViewController.swift */; };
+		F4D2EB502AF01DE20080DB15 /* Date+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4D2EB4F2AF01DE20080DB15 /* Date+Extension.swift */; };
 		F4D51B8F2AC5D10F00887950 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4D51B8E2AC5D10F00887950 /* AppDelegate.swift */; };
 		F4D51B912AC5D10F00887950 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4D51B902AC5D10F00887950 /* SceneDelegate.swift */; };
 		F4D51B932AC5D10F00887950 /* StatisticsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4D51B922AC5D10F00887950 /* StatisticsViewController.swift */; };
@@ -38,10 +38,10 @@
 		F40A1C7B2ADDCCA90011D135 /* CreateTrackerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateTrackerViewController.swift; sourceTree = "<group>"; };
 		F40A1C7D2ADF11F70011D135 /* CreateHabitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateHabitViewController.swift; sourceTree = "<group>"; };
 		F40A1C7F2AE05C650011D135 /* UITextFieldWithPadding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITextFieldWithPadding.swift; sourceTree = "<group>"; };
-		F4AB8E522AED2C0A00C98B72 /* EndingHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndingHelper.swift; sourceTree = "<group>"; };
 		F4BCB6FF2AD8835400E9D094 /* LaunchScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchScreen.swift; sourceTree = "<group>"; };
 		F4BCB7022AD8846C00E9D094 /* UIColor+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Extension.swift"; sourceTree = "<group>"; };
 		F4BCB7042AD8901000E9D094 /* TrackersViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackersViewController.swift; sourceTree = "<group>"; };
+		F4D2EB4F2AF01DE20080DB15 /* Date+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+Extension.swift"; sourceTree = "<group>"; };
 		F4D51B8B2AC5D10F00887950 /* Tracker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Tracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F4D51B8E2AC5D10F00887950 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F4D51B902AC5D10F00887950 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -77,6 +77,7 @@
 			isa = PBXGroup;
 			children = (
 				F4BCB7022AD8846C00E9D094 /* UIColor+Extension.swift */,
+				F4D2EB4F2AF01DE20080DB15 /* Date+Extension.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -146,7 +147,6 @@
 			isa = PBXGroup;
 			children = (
 				F40A1C7F2AE05C650011D135 /* UITextFieldWithPadding.swift */,
-				F4AB8E522AED2C0A00C98B72 /* EndingHelper.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -233,6 +233,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F4BCB7002AD8835400E9D094 /* LaunchScreen.swift in Sources */,
+				F4D2EB502AF01DE20080DB15 /* Date+Extension.swift in Sources */,
 				F40A1C802AE05C650011D135 /* UITextFieldWithPadding.swift in Sources */,
 				F40A1C7C2ADDCCA90011D135 /* CreateTrackerViewController.swift in Sources */,
 				F4E84FF12AE98DB0002B1EFE /* ScheduleViewControllerDelegateProtocol.swift in Sources */,
@@ -240,7 +241,6 @@
 				F40A1C7E2ADF11F70011D135 /* CreateHabitViewController.swift in Sources */,
 				F4E84FF32AE98FD7002B1EFE /* CreateTrackerDelegateProtocol.swift in Sources */,
 				F4D51B8F2AC5D10F00887950 /* AppDelegate.swift in Sources */,
-				F4AB8E532AED2C0A00C98B72 /* EndingHelper.swift in Sources */,
 				F4E84FE72AE56DBA002B1EFE /* Tracker.swift in Sources */,
 				F4E84FDE2AE567AC002B1EFE /* CreateIrregularEventViewController.swift in Sources */,
 				F4E84FDC2AE5644C002B1EFE /* WeekDay.swift in Sources */,

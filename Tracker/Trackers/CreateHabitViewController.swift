@@ -50,6 +50,14 @@ final class CreateHabitViewController: UIViewController, ScheduleViewControllerD
 		return button
 	}()
 	
+	private lazy var categoryAccessoryImageView = {
+		let accessoryImage = UIImage(named: "RightAccessoryArrow")
+		let accessoryImageView = UIImageView(image: accessoryImage)
+		accessoryImageView.translatesAutoresizingMaskIntoConstraints = false
+		
+		return accessoryImageView
+	}()
+	
 	private lazy var scheduleButton = {
 		let button = UIButton()
 		button.translatesAutoresizingMaskIntoConstraints = false
@@ -62,8 +70,17 @@ final class CreateHabitViewController: UIViewController, ScheduleViewControllerD
 		button.contentHorizontalAlignment = .leading
 		button.titleEdgeInsets.left = 16
 		button.titleEdgeInsets.right = 16
+		button.addTarget(self, action: #selector(openScheduleView), for: .touchUpInside)
 		
 		return button
+	}()
+	
+	private lazy var scheduleAccessoryImageView = {
+		let accessoryImage = UIImage(named: "RightAccessoryArrow")
+		let accessoryImageView = UIImageView(image: accessoryImage)
+		accessoryImageView.translatesAutoresizingMaskIntoConstraints = false
+		
+		return accessoryImageView
 	}()
 	
 	private lazy var divider = {
@@ -84,6 +101,7 @@ final class CreateHabitViewController: UIViewController, ScheduleViewControllerD
 		button.layer.cornerRadius = 16
 		button.layer.borderWidth = 1
 		button.layer.borderColor = UIColor.ypRedButton.cgColor
+		button.addTarget(self, action: #selector(cancelButtonDidTap), for: .touchUpInside)
 		
 		return button
 	}()
@@ -95,6 +113,7 @@ final class CreateHabitViewController: UIViewController, ScheduleViewControllerD
 		button.setTitle("Создать", for: .normal)
 		button.setTitleColor(.white, for: .normal)
 		button.layer.cornerRadius = 16
+		button.addTarget(self, action: #selector(createButtonDidTap), for: .touchUpInside)
 		
 		return button
 	}()
@@ -104,29 +123,43 @@ final class CreateHabitViewController: UIViewController, ScheduleViewControllerD
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		view.backgroundColor = .white
-		addHeaderLabel()
-		addTextField()
-		addCategoryButton()
-		addDivider()
-		addScheduleButton()
-		addCancelButton()
-		addCreateButton()
+		
+		setupViews()
+		setupConstraints()
 	}
 	
 	// MARK: UI Methods
 	
-	private func addHeaderLabel() {
+	private func setupViews() {
 		view.addSubview(headerLabel)
-		
+		view.addSubview(trackerNameTextField)
+		view.addSubview(categoryButton)
+		categoryButton.addSubview(divider)
+		view.addSubview(scheduleButton)
+		view.addSubview(cancelButton)
+		view.addSubview(createButton)
+		view.insertSubview(categoryAccessoryImageView, belowSubview: categoryButton)
+		view.insertSubview(scheduleAccessoryImageView, belowSubview: categoryButton)
+	}
+	
+	private func setupConstraints() {
+		setupHeaderConstraints()
+		setupTextFieldConstraints()
+		setupCategoryButtonConstraints()
+		setupDividerConstraints()
+		setupScheduleButtonConstraints()
+		setupCancelButtonConstraints()
+		setupCreateButtonConstraints()
+	}
+	
+	private func setupHeaderConstraints() {
 		NSLayoutConstraint.activate([
 			headerLabel.centerXAnchor.constraint(equalTo: view.centerXAnchor),
 			headerLabel.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 27)
 		])
 	}
 	
-	private func addTextField() {
-		view.addSubview(trackerNameTextField)
-		
+	private func setupTextFieldConstraints() {
 		NSLayoutConstraint.activate([
 			trackerNameTextField.centerXAnchor.constraint(equalTo: view.centerXAnchor),
 			trackerNameTextField.topAnchor.constraint(equalTo: headerLabel.bottomAnchor, constant: 38),
@@ -136,30 +169,21 @@ final class CreateHabitViewController: UIViewController, ScheduleViewControllerD
 		])
 	}
 	
-	private func addCategoryButton() {
-		view.addSubview(categoryButton)
-		
-		let accessoryImage = UIImage(named: "RightAccessoryArrow")
-		let accessoryImageView = UIImageView(image: accessoryImage)
-		accessoryImageView.translatesAutoresizingMaskIntoConstraints = false
-		view.insertSubview(accessoryImageView, belowSubview: categoryButton)
-		
+	private func setupCategoryButtonConstraints() {
 		NSLayoutConstraint.activate([
 			categoryButton.topAnchor.constraint(equalTo: trackerNameTextField.bottomAnchor, constant: 24),
 			categoryButton.heightAnchor.constraint(equalToConstant: 75),
 			categoryButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
 			categoryButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
 			
-			accessoryImageView.centerYAnchor.constraint(equalTo: categoryButton.centerYAnchor),
-			accessoryImageView.trailingAnchor.constraint(equalTo: categoryButton.trailingAnchor, constant: -16),
-			accessoryImageView.widthAnchor.constraint(equalToConstant: 24),
-			accessoryImageView.heightAnchor.constraint(equalToConstant: 24)
+			categoryAccessoryImageView.centerYAnchor.constraint(equalTo: categoryButton.centerYAnchor),
+			categoryAccessoryImageView.trailingAnchor.constraint(equalTo: categoryButton.trailingAnchor, constant: -16),
+			categoryAccessoryImageView.widthAnchor.constraint(equalToConstant: 24),
+			categoryAccessoryImageView.heightAnchor.constraint(equalToConstant: 24)
 		])
 	}
 	
-	private func addDivider() {
-		categoryButton.addSubview(divider)
-		
+	private func setupDividerConstraints() {
 		NSLayoutConstraint.activate([
 			divider.centerYAnchor.constraint(equalTo: categoryButton.bottomAnchor),
 			divider.heightAnchor.constraint(equalToConstant: divider.frame.height),
@@ -168,32 +192,21 @@ final class CreateHabitViewController: UIViewController, ScheduleViewControllerD
 		])
 	}
 	
-	private func addScheduleButton() {
-		view.addSubview(scheduleButton)
-		
-		let accessoryImage = UIImage(named: "RightAccessoryArrow")
-		let accessoryImageView = UIImageView(image: accessoryImage)
-		accessoryImageView.translatesAutoresizingMaskIntoConstraints = false
-		view.insertSubview(accessoryImageView, belowSubview: scheduleButton)
-		
+	private func setupScheduleButtonConstraints() {
 		NSLayoutConstraint.activate([
 			scheduleButton.topAnchor.constraint(equalTo: categoryButton.bottomAnchor),
 			scheduleButton.heightAnchor.constraint(equalToConstant: 75),
 			scheduleButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
 			scheduleButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -16),
 			
-			accessoryImageView.centerYAnchor.constraint(equalTo: scheduleButton.centerYAnchor),
-			accessoryImageView.trailingAnchor.constraint(equalTo: scheduleButton.trailingAnchor, constant: -16),
-			accessoryImageView.widthAnchor.constraint(equalToConstant: 24),
-			accessoryImageView.heightAnchor.constraint(equalToConstant: 24)
+			scheduleAccessoryImageView.centerYAnchor.constraint(equalTo: scheduleButton.centerYAnchor),
+			scheduleAccessoryImageView.trailingAnchor.constraint(equalTo: scheduleButton.trailingAnchor, constant: -16),
+			scheduleAccessoryImageView.widthAnchor.constraint(equalToConstant: 24),
+			scheduleAccessoryImageView.heightAnchor.constraint(equalToConstant: 24)
 		])
-		
-		scheduleButton.addTarget(self, action: #selector(openScheduleView), for: .touchUpInside)
 	}
 	
-	private func addCancelButton() {
-		view.addSubview(cancelButton)
-		
+	private func setupCancelButtonConstraints() {
 		// 20 - отступы кнопок от краев экрана, 8 - отступ между кнопками
 		let buttonWidth = (view.frame.width - 48) / 2
 		
@@ -203,13 +216,9 @@ final class CreateHabitViewController: UIViewController, ScheduleViewControllerD
 			cancelButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
 			cancelButton.widthAnchor.constraint(equalToConstant: buttonWidth)
 		])
-		
-		cancelButton.addTarget(self, action: #selector(cancelButtonDidTap), for: .touchUpInside)
 	}
 	
-	private func addCreateButton() {
-		view.addSubview(createButton)
-		
+	private func setupCreateButtonConstraints() {
 		// 20 - отступы кнопок от краев экрана, 8 - отступ между кнопками
 		let buttonWidth = (view.frame.width - 48) / 2
 		
@@ -219,8 +228,6 @@ final class CreateHabitViewController: UIViewController, ScheduleViewControllerD
 			createButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
 			createButton.widthAnchor.constraint(equalToConstant: buttonWidth)
 		])
-		
-		createButton.addTarget(self, action: #selector(createButtonDidTap), for: .touchUpInside)
 	}
 	
 	// MARK: Private methods

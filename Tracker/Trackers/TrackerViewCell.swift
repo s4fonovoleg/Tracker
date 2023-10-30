@@ -80,13 +80,20 @@ final class TrackerViewCell: UICollectionViewCell {
 	override init(frame: CGRect) {
 		super.init(frame: frame)
 		
+		setupViews()
+		setupConstraints()
+	}
+	
+	private func setupViews() {
 		contentView.addSubview(colorView)
 		contentView.addSubview(countLabel)
 		contentView.addSubview(doneButton)
 		colorView.addSubview(emojiBackground)
 		colorView.addSubview(emojiLabel)
 		colorView.addSubview(textView)
-		
+	}
+	
+	private func setupConstraints() {
 		NSLayoutConstraint.activate([
 			colorView.widthAnchor.constraint(equalTo: contentView.widthAnchor),
 			colorView.topAnchor.constraint(equalTo: contentView.topAnchor),
