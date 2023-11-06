@@ -11,6 +11,9 @@
 		F40A1C7C2ADDCCA90011D135 /* CreateTrackerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40A1C7B2ADDCCA90011D135 /* CreateTrackerViewController.swift */; };
 		F40A1C7E2ADF11F70011D135 /* CreateHabitViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40A1C7D2ADF11F70011D135 /* CreateHabitViewController.swift */; };
 		F40A1C802AE05C650011D135 /* UITextFieldWithPadding.swift in Sources */ = {isa = PBXBuildFile; fileRef = F40A1C7F2AE05C650011D135 /* UITextFieldWithPadding.swift */; };
+		F4AF4EC42AF17302007A7F02 /* EmojiViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4AF4EC32AF17302007A7F02 /* EmojiViewCell.swift */; };
+		F4AF4EC62AF179A1007A7F02 /* EmojiSupplementaryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4AF4EC52AF179A1007A7F02 /* EmojiSupplementaryView.swift */; };
+		F4AF4EC92AF1883E007A7F02 /* ColorViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4AF4EC82AF1883E007A7F02 /* ColorViewCell.swift */; };
 		F4BCB7002AD8835400E9D094 /* LaunchScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4BCB6FF2AD8835400E9D094 /* LaunchScreen.swift */; };
 		F4BCB7032AD8846C00E9D094 /* UIColor+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4BCB7022AD8846C00E9D094 /* UIColor+Extension.swift */; };
 		F4BCB7052AD8901000E9D094 /* TrackersViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4BCB7042AD8901000E9D094 /* TrackersViewController.swift */; };
@@ -38,6 +41,9 @@
 		F40A1C7B2ADDCCA90011D135 /* CreateTrackerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateTrackerViewController.swift; sourceTree = "<group>"; };
 		F40A1C7D2ADF11F70011D135 /* CreateHabitViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateHabitViewController.swift; sourceTree = "<group>"; };
 		F40A1C7F2AE05C650011D135 /* UITextFieldWithPadding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITextFieldWithPadding.swift; sourceTree = "<group>"; };
+		F4AF4EC32AF17302007A7F02 /* EmojiViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiViewCell.swift; sourceTree = "<group>"; };
+		F4AF4EC52AF179A1007A7F02 /* EmojiSupplementaryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmojiSupplementaryView.swift; sourceTree = "<group>"; };
+		F4AF4EC82AF1883E007A7F02 /* ColorViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorViewCell.swift; sourceTree = "<group>"; };
 		F4BCB6FF2AD8835400E9D094 /* LaunchScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchScreen.swift; sourceTree = "<group>"; };
 		F4BCB7022AD8846C00E9D094 /* UIColor+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIColor+Extension.swift"; sourceTree = "<group>"; };
 		F4BCB7042AD8901000E9D094 /* TrackersViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackersViewController.swift; sourceTree = "<group>"; };
@@ -73,6 +79,17 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		F4AF4EC72AF17B17007A7F02 /* CreateHabit */ = {
+			isa = PBXGroup;
+			children = (
+				F40A1C7D2ADF11F70011D135 /* CreateHabitViewController.swift */,
+				F4AF4EC52AF179A1007A7F02 /* EmojiSupplementaryView.swift */,
+				F4AF4EC32AF17302007A7F02 /* EmojiViewCell.swift */,
+				F4AF4EC82AF1883E007A7F02 /* ColorViewCell.swift */,
+			);
+			path = CreateHabit;
+			sourceTree = "<group>";
+		};
 		F4BCB7012AD8845900E9D094 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
@@ -105,10 +122,11 @@
 				F4BCB7012AD8845900E9D094 /* Extensions */,
 				F4E84FE32AE56CE4002B1EFE /* Helpers */,
 				F4E84FE22AE56CCE002B1EFE /* Trackers */,
+				F4AF4EC72AF17B17007A7F02 /* CreateHabit */,
 				F4E84FE12AE56CB9002B1EFE /* Statistics */,
 				F4D51B8E2AC5D10F00887950 /* AppDelegate.swift */,
-				F4D51B902AC5D10F00887950 /* SceneDelegate.swift */,
 				F4BCB6FF2AD8835400E9D094 /* LaunchScreen.swift */,
+				F4D51B902AC5D10F00887950 /* SceneDelegate.swift */,
 				F4D51B942AC5D10F00887950 /* Main.storyboard */,
 				F4D51B972AC5D11200887950 /* Assets.xcassets */,
 				F4D51B992AC5D11200887950 /* LaunchScreen.storyboard */,
@@ -133,7 +151,6 @@
 				F4BCB7042AD8901000E9D094 /* TrackersViewController.swift */,
 				F4E84FF22AE98FD7002B1EFE /* CreateTrackerDelegateProtocol.swift */,
 				F40A1C7B2ADDCCA90011D135 /* CreateTrackerViewController.swift */,
-				F40A1C7D2ADF11F70011D135 /* CreateHabitViewController.swift */,
 				F4E84FD92AE43DCE002B1EFE /* ScheduleViewController.swift */,
 				F4E84FF02AE98DB0002B1EFE /* ScheduleViewControllerDelegateProtocol.swift */,
 				F4E84FDD2AE567AC002B1EFE /* CreateIrregularEventViewController.swift */,
@@ -232,6 +249,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F4AF4EC62AF179A1007A7F02 /* EmojiSupplementaryView.swift in Sources */,
 				F4BCB7002AD8835400E9D094 /* LaunchScreen.swift in Sources */,
 				F4D2EB502AF01DE20080DB15 /* Date+Extension.swift in Sources */,
 				F40A1C802AE05C650011D135 /* UITextFieldWithPadding.swift in Sources */,
@@ -239,6 +257,7 @@
 				F4E84FF12AE98DB0002B1EFE /* ScheduleViewControllerDelegateProtocol.swift in Sources */,
 				F4D51B932AC5D10F00887950 /* StatisticsViewController.swift in Sources */,
 				F40A1C7E2ADF11F70011D135 /* CreateHabitViewController.swift in Sources */,
+				F4AF4EC92AF1883E007A7F02 /* ColorViewCell.swift in Sources */,
 				F4E84FF32AE98FD7002B1EFE /* CreateTrackerDelegateProtocol.swift in Sources */,
 				F4D51B8F2AC5D10F00887950 /* AppDelegate.swift in Sources */,
 				F4E84FE72AE56DBA002B1EFE /* Tracker.swift in Sources */,
@@ -253,6 +272,7 @@
 				F4E84FDA2AE43DCE002B1EFE /* ScheduleViewController.swift in Sources */,
 				F4BCB7052AD8901000E9D094 /* TrackersViewController.swift in Sources */,
 				F4E84FED2AE5A1B3002B1EFE /* TrackerViewCell.swift in Sources */,
+				F4AF4EC42AF17302007A7F02 /* EmojiViewCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
