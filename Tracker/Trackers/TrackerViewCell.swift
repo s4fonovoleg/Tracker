@@ -11,7 +11,7 @@ final class TrackerViewCell: UICollectionViewCell {
 	
 	var tracker: Tracker?
 	
-	var doneOnDate: Bool = false {
+	var completedOnDate: Bool = false {
 		didSet {
 			updateDoneButton()
 		}
@@ -64,7 +64,7 @@ final class TrackerViewCell: UICollectionViewCell {
 	
 	private lazy var doneButton = {
 		let symbolSize = UIImage.SymbolConfiguration(pointSize: 11)
-		let image = UIImage(systemName: doneOnDate ? "checkmark" : "plus", withConfiguration: symbolSize)
+		let image = UIImage(systemName: completedOnDate ? "checkmark" : "plus", withConfiguration: symbolSize)
 		let button = UIButton(frame: CGRect(x: 0, y: 0, width: 34, height: 34))
 		button.translatesAutoresizingMaskIntoConstraints = false
 		button.layer.cornerRadius = button.frame.width / 2
@@ -134,11 +134,25 @@ final class TrackerViewCell: UICollectionViewCell {
 		delegate?.doneButtonDidTap(self)
 	}
 	
+	private func getNumberEnding(for num: Int, _ firstForm: String, _ secondForm: String, _ thirdFrom: String) -> String {
+		let lastNumber = num % 10
+		
+		if lastNumber == 0 || lastNumber > 4 {
+			return firstForm
+		}
+		
+		if lastNumber == 1 {
+			return secondForm
+		}
+		
+		return thirdFrom
+	}
+	
 	// MARK: Public methods
 	
-	func configure(tracker: Tracker, doneOnDate: Bool) {
+	func configure(tracker: Tracker, completedOnDate: Bool, counter: Int) {
 		self.tracker = tracker
-		self.doneOnDate = doneOnDate
+		self.completedOnDate = completedOnDate
 		
 		textView.text = tracker.name
 		colorView.backgroundColor = tracker.color
@@ -146,12 +160,21 @@ final class TrackerViewCell: UICollectionViewCell {
 		emojiLabel.text = tracker.emoji
 		doneButton.backgroundColor = tracker.color
 		
+		let daysCaption = getNumberEnding(
+			for: counter,
+			"дней",
+			"день",
+			"дня")
+		
+		countLabel.text = "\(counter) \(daysCaption)"
+		self.completedOnDate = completedOnDate
+		
 		updateDoneButton()
 	}
 	
 	func updateDoneButton() {
 		let symbolSize = UIImage.SymbolConfiguration(pointSize: 11)
-		let image = UIImage(systemName: doneOnDate ? "checkmark" : "plus", withConfiguration: symbolSize)
+		let image = UIImage(systemName: completedOnDate ? "checkmark" : "plus", withConfiguration: symbolSize)
 		doneButton.setImage(image, for: .normal)
 	}
 }

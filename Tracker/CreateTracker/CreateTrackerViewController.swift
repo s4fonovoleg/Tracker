@@ -1,24 +1,16 @@
 import UIKit
 
-final class CreateHabitViewController: UIViewController, ScheduleViewControllerDelegateProtocol {
+final class CreateTrackerViewController: UIViewController {
+	
 	// MARK: Private properties
 	
-	private var weekDays: Set<WeekDay> = Set()
-	
 	private let emojiCellReuseIdentifier = "EmojiCell"
-	
 	private let colorCellReuseIdentifier = "ColorCell"
-	
-	private var lastSelectedEmojiIndexPath: IndexPath?
-	
-	private var lastSelectedColorIndexPath: IndexPath?
-	
 	private let emojies = [
 		"🙂", "😻", "🌺", "🐶", "❤️", "😱",
 		"😇", "😡", "🥶", "🤔", "🙌", "🍔",
 		"🥦", "🏓", "🥇", "🎸", "🏝", "😪",
 	]
-	
 	private let colors: [UIColor] = [
 		.trackerColor1, .trackerColor2, .trackerColor3, .trackerColor4,
 		.trackerColor5, .trackerColor6, .trackerColor7, .trackerColor8,
@@ -27,8 +19,13 @@ final class CreateHabitViewController: UIViewController, ScheduleViewControllerD
 		.trackerColor17, .trackerColor18,
 	]
 	
+	private var weekDays: Set<WeekDay> = Set()
+	private var lastSelectedEmojiIndexPath: IndexPath?
+	private var lastSelectedColorIndexPath: IndexPath?
+	
 	// MARK: Public properties
 	
+	var isHabit = true
 	var delegate: CreateTrackerDelegateProtocol?
 	
 	// MARK: UI properties
@@ -80,10 +77,13 @@ final class CreateHabitViewController: UIViewController, ScheduleViewControllerD
 		button.setTitleColor(.black, for: .normal)
 		button.titleLabel?.font = .systemFont(ofSize: 16, weight: .light)
 		button.layer.cornerRadius = 16
-		button.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-		button.contentHorizontalAlignment = .leading
 		button.titleEdgeInsets.left = 16
 		button.titleEdgeInsets.right = 16
+		button.contentHorizontalAlignment = .leading
+		
+		if isHabit {
+			button.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+		}
 		
 		return button
 	}()
@@ -181,11 +181,6 @@ final class CreateHabitViewController: UIViewController, ScheduleViewControllerD
 		cancelButton.addTarget(self, action: #selector(cancelButtonDidTap), for: .touchUpInside)
 	}
 	
-	override func viewDidLayoutSubviews() {
-		super.viewDidLayoutSubviews()
-//		scrollView.contentSize = CGSize(width: view.frame.width, height: 915)
-	}
-	
 	// MARK: UI Methods
 	
 	private func setupViews() {
@@ -197,9 +192,13 @@ final class CreateHabitViewController: UIViewController, ScheduleViewControllerD
 		contentView.addSubview(trackerNameTextField)
 		contentView.addSubview(categoryButton)
 		contentView.insertSubview(categoryAccessoryImageView, belowSubview: categoryButton)
-		categoryButton.addSubview(divider)
-		contentView.addSubview(scheduleButton)
-		contentView.insertSubview(scheduleAccessoryImageView, belowSubview: scheduleButton)
+		
+		if isHabit {
+			categoryButton.addSubview(divider)
+			contentView.addSubview(scheduleButton)
+			contentView.insertSubview(scheduleAccessoryImageView, belowSubview: scheduleButton)
+		}
+		
 		contentView.addSubview(emojiCollectionView)
 		contentView.addSubview(colorCollectionView)
 		contentView.addSubview(cancelButton)
@@ -224,8 +223,12 @@ final class CreateHabitViewController: UIViewController, ScheduleViewControllerD
 		setupHeaderConstraints()
 		setupTextFieldConstraints()
 		setupCategoryButtonConstraints()
-		setupDividerConstraints()
-		setupScheduleButtonConstraints()
+		
+		if isHabit {
+			setupDividerConstraints()
+			setupScheduleButtonConstraints()
+		}
+		
 		setupEmojiCollectionViewConstraints()
 		setupColorCollectionViewConstraints()
 		setupCancelButtonConstraints()
@@ -312,8 +315,10 @@ final class CreateHabitViewController: UIViewController, ScheduleViewControllerD
 	}
 	
 	private func setupEmojiCollectionViewConstraints() {
+		let bottomButton = isHabit ? scheduleButton : categoryButton
+		
 		NSLayoutConstraint.activate([
-			emojiCollectionView.topAnchor.constraint(equalTo: scheduleButton.bottomAnchor, constant: 32),
+			emojiCollectionView.topAnchor.constraint(equalTo: bottomButton.bottomAnchor, constant: 32),
 			emojiCollectionView.heightAnchor.constraint(equalToConstant: 222), // 484
 			emojiCollectionView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 19),
 			emojiCollectionView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -19)
@@ -362,12 +367,20 @@ final class CreateHabitViewController: UIViewController, ScheduleViewControllerD
 	}
 	
 	@objc private func createButtonDidTap() {
+		guard let emojiIndex = lastSelectedEmojiIndexPath?.row,
+			  let colorIndex = lastSelectedColorIndexPath?.row else {
+			return
+		}
+		
+		let emoji = emojies[emojiIndex]
+		let color = colors[colorIndex]
+		
 		delegate?.trackerCreated(tracker: Tracker(
 			id: UUID(),
 			name: trackerNameTextField.text ?? "",
-			color: .lightGray,
-			emoji: "🤪",
-			weekDays: weekDays)
+			color: color,
+			emoji: emoji,
+			weekDays: getWeekDays())
 		)
 		dismiss(animated: true)
 	}
@@ -381,8 +394,26 @@ final class CreateHabitViewController: UIViewController, ScheduleViewControllerD
 		present(controller, animated: true)
 	}
 	
-	// MARK: Public methods
-	
+	private func getWeekDays() -> Set<WeekDay> {
+		if isHabit {
+			return weekDays
+		}
+		
+		return [
+			.monday,
+			.thuesday,
+			.wednesday,
+			.thursday,
+			.friday,
+			.saturday,
+			.sunday,
+		]
+	}
+}
+
+// MARK: ScheduleViewControllerDelegateProtocol
+
+extension CreateTrackerViewController: ScheduleViewControllerDelegateProtocol {
 	func addSchedule(weekDays: Set<WeekDay>) {
 		self.weekDays = weekDays
 	}
@@ -390,7 +421,7 @@ final class CreateHabitViewController: UIViewController, ScheduleViewControllerD
 
 // MARK: UICollectionViewDataSource
 
-extension CreateHabitViewController: UICollectionViewDataSource {
+extension CreateTrackerViewController: UICollectionViewDataSource {
 	func numberOfSections(in collectionView: UICollectionView) -> Int {
 		2
 	}
@@ -443,7 +474,7 @@ extension CreateHabitViewController: UICollectionViewDataSource {
 
 // MARK: UICollectionViewDelegate
 
-extension CreateHabitViewController: UICollectionViewDelegate {
+extension CreateTrackerViewController: UICollectionViewDelegate {
 	func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
 		if collectionView == emojiCollectionView {
 			let indexesToReload = [indexPath, lastSelectedEmojiIndexPath].compactMap({ $0 })
@@ -466,24 +497,24 @@ extension CreateHabitViewController: UICollectionViewDelegate {
 		}
 	}
 	
-	func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-		if collectionView == emojiCollectionView {
-			guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: emojiCellReuseIdentifier, for: indexPath) as? EmojiViewCell else {
-				return
-			}
-			
-			cell.titleLabel.text = emojies[indexPath.row]
-		}
-		
-		guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: colorCellReuseIdentifier, for: indexPath) as? ColorViewCell else {
-			return
-		}
-	}
+//	func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
+//		if collectionView == emojiCollectionView {
+//			guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: emojiCellReuseIdentifier, for: indexPath) as? EmojiViewCell else {
+//				return
+//			}
+//			
+//			cell.titleLabel.text = emojies[indexPath.row]
+//		}
+//		
+//		guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: colorCellReuseIdentifier, for: indexPath) as? ColorViewCell else {
+//			return
+//		}
+//	}
 }
 
 // MARK: UICollectionViewDelegateFlowLayout
 
-extension CreateHabitViewController: UICollectionViewDelegateFlowLayout {
+extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
 	func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, minimumInteritemSpacingForSectionAt section: Int) -> CGFloat {
 		0
 	}

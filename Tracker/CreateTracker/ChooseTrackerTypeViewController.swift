@@ -1,6 +1,6 @@
 import UIKit
 
-final class CreateTrackerViewController: UIViewController, CreateTrackerDelegateProtocol {
+final class ChooseTrackerTypeViewController: UIViewController, CreateTrackerDelegateProtocol {
 	// MARK: Public properties
 	
 	var delegate: CreateTrackerDelegateProtocol?
@@ -93,17 +93,18 @@ final class CreateTrackerViewController: UIViewController, CreateTrackerDelegate
 	// MARK: Private methods
 	
 	@objc private func addHabitButtonDidTap() {
-		let controller = CreateHabitViewController()
-		controller.modalPresentationStyle = .pageSheet
-		controller.delegate = self
-		
-		present(controller, animated: true)
+		addNewTracker(isHabit: true)
 	}
 	
 	@objc private func addIrregularEventButtonDidTap() {
-		let controller = CreateIrregularEventViewController()
+		addNewTracker(isHabit: false)
+	}
+	
+	private func addNewTracker(isHabit: Bool) {
+		let controller = CreateTrackerViewController()
 		controller.modalPresentationStyle = .pageSheet
 		controller.delegate = self
+		controller.isHabit = isHabit
 		
 		present(controller, animated: true)
 	}

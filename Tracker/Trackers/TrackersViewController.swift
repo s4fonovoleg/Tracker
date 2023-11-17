@@ -2,11 +2,10 @@ import UIKit
 
 final class TrackersViewController: UIViewController, CreateTrackerDelegateProtocol {
 	// MARK: Private properties
+
 	private let defaultCategoryName = "Общее"
-	
-	private let calendar = Calendar(identifier: .gregorian)
-	
 	private let cellReuseIdentifier = "cell"
+	private var calendar = Calendar(identifier: .gregorian)
 	
 	private var currentDate: Date = Date() {
 		didSet {
@@ -14,15 +13,21 @@ final class TrackersViewController: UIViewController, CreateTrackerDelegateProto
 		}
 	}
 	
-	private var categories: [TrackerCategory] = []
-	
-	private var visibleCategories: [TrackerCategory] = [TrackerCategory]() {
+	private var categories: [TrackerCategory] = [] {
 		didSet {
-			updateEmptyTrackersImage()
+			filterCategories()
 		}
 	}
 	
-	private var completedTrackers: [TrackerRecord] = [TrackerRecord]()
+	private var visibleCategories: [TrackerCategory] = [TrackerCategory]()
+	
+	private var completedTrackers: [TrackerRecord] = [TrackerRecord]() {
+		didSet {
+			filterCategories()
+		}
+	}
+	
+	private let dataProvider = DataProvider()
 	
 	// MARK: UI properties
 	
@@ -86,6 +91,9 @@ final class TrackersViewController: UIViewController, CreateTrackerDelegateProto
 		super.viewDidLoad()
 		initUI()
 		updateEmptyTrackersImage()
+		dataProvider.delegate = self
+		categories = dataProvider.categories
+		completedTrackers = dataProvider.trackerRecords
 	}
 	
 	// MARK: UI methods
@@ -180,7 +188,7 @@ final class TrackersViewController: UIViewController, CreateTrackerDelegateProto
 	}
 	
 	@objc private func addButtonDidTap() {
-		let controller = CreateTrackerViewController()
+		let controller = ChooseTrackerTypeViewController()
 		controller.modalPresentationStyle = .pageSheet
 		controller.delegate = self
 		
@@ -223,40 +231,19 @@ final class TrackersViewController: UIViewController, CreateTrackerDelegateProto
 		
 		visibleCategories = filteredCategories
 		collectionView.reloadData()
-	}
-	
-	private func getNumberEnding(for num: Int, _ firstForm: String, _ secondForm: String, _ thirdFrom: String) -> String {
-		let lastNumber = num % 10
-		
-		if lastNumber == 0 || lastNumber > 4 {
-			return firstForm
-		}
-		
-		if lastNumber == 1 {
-			return secondForm
-		}
-		
-		return thirdFrom
+		updateEmptyTrackersImage()
 	}
 	
 	// MARK: Public methods
 	
 	func trackerCreated(tracker: Tracker) {
-		let currentCategories = categories
-		let currentTrackers = currentCategories.count > 0 ?
-			currentCategories[0].trackers :
-			[Tracker]()
-		
-		var newCategories = currentCategories
-		var newTrackers = currentTrackers
-		
-		newTrackers.append(tracker)
-		
-		newCategories.append(TrackerCategory(name: defaultCategoryName, trackers: newTrackers))
-		
-		categories = newCategories
-		
-		filterCategories()
+		if categories.isEmpty {
+			categories.append(TrackerCategory(
+				name: defaultCategoryName,
+				trackers: [Tracker]())
+			)
+		}
+		try? dataProvider.trackerCreated(tracker, in: categories[0])
 	}
 }
 
@@ -276,13 +263,16 @@ extension TrackersViewController: UICollectionViewDataSource {
 		}
 		
 		let tracker = visibleCategories[indexPath.section].trackers[indexPath.row]
-		let completedTrackersOnDateCount = completedTrackers.filter { trackerRecord in
+		let completed = completedTrackers.filter { trackerRecord in
 			trackerRecord.trackerId == tracker.id &&
 			trackerRecord.date == datePicker.date.removeTime
+		}.count > 0
+		let totalCompletedCounter = completedTrackers.filter { trackerRecord in
+			trackerRecord.trackerId == tracker.id
 		}.count
 		
 		cell.delegate = self
-		cell.configure(tracker: tracker, doneOnDate: completedTrackersOnDateCount > 0)
+		cell.configure(tracker: tracker, completedOnDate: completed, counter: totalCompletedCounter)
 		
 		return cell
 	}
@@ -305,42 +295,18 @@ extension TrackersViewController: UICollectionViewDataSource {
 extension TrackersViewController: TrackerViewCellDelegate {
 	func doneButtonDidTap(_ cell: TrackerViewCell) {
 		guard let tracker = cell.tracker,
-			  let date = datePicker.date.removeTime else {
+			  let date = datePicker.date.removeTime,
+			  date <= Date() else {
 			return
 		}
 		
-		if date > Date() {
-			return
-		}
-		
-		var completedTrackersOnDateCount = completedTrackers.filter { trackerRecord in
+		let trackerRecord = TrackerRecord(trackerId: tracker.id, date: date)
+		var completedToday = completedTrackers.filter { trackerRecord in
 			trackerRecord.trackerId == tracker.id &&
 			trackerRecord.date == date
-		}.count
+		}.count > 0
 		
-		if completedTrackersOnDateCount > 0 {
-			completedTrackers.removeAll { trackerRecord in
-				trackerRecord.trackerId == tracker.id &&
-				trackerRecord.date == date
-			}
-			completedTrackersOnDateCount -= 1
-		} else {
-			completedTrackers.append(TrackerRecord(trackerId: tracker.id, date: date))
-			completedTrackersOnDateCount += 1
-		}
-		
-		let completedTrackersCount = completedTrackers.filter { trackerRecord in
-			trackerRecord.trackerId == tracker.id
-		}.count
-		
-		let daysCaption = getNumberEnding(
-			for: completedTrackersCount,
-			"дней",
-			"день",
-			"дня")
-		
-		cell.countLabel.text = "\(completedTrackersCount) \(daysCaption)"
-		cell.doneOnDate = completedTrackersOnDateCount > 0
+		dataProvider.setTrackerRecord(trackerRecord, completed: completedToday)
 	}
 }
 
@@ -383,5 +349,21 @@ extension TrackersViewController: UITextFieldDelegate {
 	func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
 		filterCategories()
 		return true
+	}
+}
+
+// MARK: DataProviderDelegate
+
+extension TrackersViewController: DataProviderDelegate {
+	func didChangeCategory() {
+		categories = dataProvider.categories
+	}
+	
+	func didChangeTracker() {
+		categories = dataProvider.categories
+	}
+	
+	func didChangeTrackerRecord() {
+		completedTrackers = dataProvider.trackerRecords
 	}
 }
