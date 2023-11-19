@@ -12,6 +12,23 @@ protocol TrackerCategoryStoreDelegate {
 // MARK: TrackerCategoryStore
 
 final class TrackerCategoryStore: NSObject {
+	
+	// MARK: Public Properties
+	
+	var categories: [TrackerCategory] {
+		guard let objects = self.fetchedResultsController.fetchedObjects else {
+			return []
+		}
+		
+		let categories = try? objects.map { item in
+			try trackerCategory(from: item)
+		}
+		
+		return categories ?? []
+	}
+	
+	var delegate: TrackerCategoryStoreDelegate?
+	
 	// MARK: Private properties
 	
 	private var context: NSManagedObjectContext
@@ -39,22 +56,6 @@ final class TrackerCategoryStore: NSObject {
 		return fetchedResultsController
 	}()
 	
-	// MARK: Public Properties
-	
-	var categories: [TrackerCategory] {
-		guard let objects = self.fetchedResultsController.fetchedObjects else {
-			return []
-		}
-		
-		let categories = try? objects.map { item in
-			try trackerCategory(from: item)
-		}
-		
-		return categories ?? []
-	}
-	
-	var delegate: TrackerCategoryStoreDelegate?
-	
 	// MARK: Lifecycle
 	
 	init(context: NSManagedObjectContext) {
@@ -67,6 +68,22 @@ final class TrackerCategoryStore: NSObject {
 			return
 		}
 		self.init(context: appDelegate.persistentContainer.viewContext)
+	}
+	
+	// MARK: Public methods
+	
+	func addNewTrackerCategoryIfNotExists(_ category: TrackerCategory) throws -> TrackerCategoryCoreData {
+		guard let categoryCoreData = categoryCoreData(with: category.name) else {
+			return try addNewTrackerCategory(category)
+		}
+		
+		return categoryCoreData
+	}
+	
+	func categoryCoreData(with name: String) -> TrackerCategoryCoreData? {
+		fetchedResultsController.fetchedObjects?.first(where: { item in
+			item.name == name
+		})
 	}
 	
 	// MARK: Private methods
@@ -119,26 +136,12 @@ final class TrackerCategoryStore: NSObject {
 		
 		return categoryCoreData
 	}
-	
-	// MARK: Public methods
-	
-	func addNewTrackerCategoryIfNotExists(_ category: TrackerCategory) throws -> TrackerCategoryCoreData {
-		guard let categoryCoreData = categoryCoreData(with: category.name) else {
-			return try addNewTrackerCategory(category)
-		}
-		
-		return categoryCoreData
-	}
-	
-	func categoryCoreData(with name: String) -> TrackerCategoryCoreData? {
-		fetchedResultsController.fetchedObjects?.first(where: { item in
-			item.name == name
-		})
-	}
 }
 
 // MARK: NSFetchedResultsControllerDelegate
 
 extension TrackerCategoryStore: NSFetchedResultsControllerDelegate {
-	
+	func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+		delegate?.didChangeCategory()
+	}
 }

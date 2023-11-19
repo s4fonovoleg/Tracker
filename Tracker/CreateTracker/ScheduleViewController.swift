@@ -1,19 +1,17 @@
 import UIKit
 
 final class ScheduleViewController: UIViewController {
+	
 	// MARK: Public properties
 	
 	var weekDays: Set<WeekDay> = Set()
+	var delegate: ScheduleViewControllerDelegateProtocol?
 	
 	// MARK: Private properties
 	
 	private var weekDaysConstraints: [NSLayoutConstraint] = [NSLayoutConstraint]()
 	
 	private let cellReuseIdentifier = "weekDayCell"
-	
-	// MARK: Public properties
-	
-	var delegate: ScheduleViewControllerDelegateProtocol?
 	
 	// MARK: UI properties
 	

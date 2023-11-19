@@ -9,7 +9,25 @@ protocol TrackerRecordStoreDelegate {
 	func didChangeTrackerRecord()
 }
 
+// MARK: TrackerRecordStore
+
 final class TrackerRecordStore: NSObject {
+	
+	// MARK: Public Properties
+	
+	var delegate: TrackerRecordStoreDelegate?
+	
+	var trackerRecords: [TrackerRecord] {
+		guard let objects = self.fetchedResultsController.fetchedObjects else {
+			return []
+		}
+		
+		let trackerRecords = try? objects.map { item in
+			try trackerRecord(from: item)
+		}
+		
+		return trackerRecords ?? []
+	}
 	
 	// MARK: Private properties
 	
@@ -34,22 +52,6 @@ final class TrackerRecordStore: NSObject {
 		return fetchedResultsController
 	}()
 	
-	// MARK: Public Properties
-	
-	var delegate: TrackerRecordStoreDelegate?
-	
-	var trackerRecords: [TrackerRecord] {
-		guard let objects = self.fetchedResultsController.fetchedObjects else {
-			return []
-		}
-		
-		let trackerRecords = try? objects.map { item in
-			try trackerRecord(from: item)
-		}
-		
-		return trackerRecords ?? []
-	}
-	
 	// MARK: Lifecycle
 	
 	init(context: NSManagedObjectContext) {
@@ -62,18 +64,6 @@ final class TrackerRecordStore: NSObject {
 			return
 		}
 		self.init(context: appDelegate.persistentContainer.viewContext)
-	}
-	
-	// MARK: Private methods
-	
-	private func trackerRecord(from trackerRecordCoreData: TrackerRecordCoreData) throws -> TrackerRecord {
-		guard let trackerId = trackerRecordCoreData.trackerId,
-			  let date = trackerRecordCoreData.date else {
-			throw TrackerRecordStoreError.decodingError
-		}
-		return TrackerRecord(
-			trackerId: trackerId,
-			date: date)
 	}
 	
 	// MARK: Public methods
@@ -105,6 +95,18 @@ final class TrackerRecordStore: NSObject {
 		}
 		
 		context.delete(trackerRecordCoreData)
+	}
+	
+	// MARK: Private methods
+	
+	private func trackerRecord(from trackerRecordCoreData: TrackerRecordCoreData) throws -> TrackerRecord {
+		guard let trackerId = trackerRecordCoreData.trackerId,
+			  let date = trackerRecordCoreData.date else {
+			throw TrackerRecordStoreError.decodingError
+		}
+		return TrackerRecord(
+			trackerId: trackerId,
+			date: date)
 	}
 }
 

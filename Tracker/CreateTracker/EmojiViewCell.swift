@@ -1,6 +1,9 @@
 import UIKit
 
 final class EmojiViewCell: UICollectionViewCell {
+	
+	// MARK: Public properties
+	
 	lazy var titleLabel = {
 		let label = UILabel()
 		label.translatesAutoresizingMaskIntoConstraints = false
@@ -18,6 +21,8 @@ final class EmojiViewCell: UICollectionViewCell {
 		
 		return view
 	}()
+	
+	// MARK: Lifecycle
 	
 	override init(frame: CGRect) {
 		super.init(frame: frame)

@@ -15,12 +15,6 @@ protocol DataProviderDelegate {
 
 final class DataProvider {
 	
-	// MARK: Private properties
-	
-	private var trackerStore = TrackerStore()
-	private var trackerCategoryStore = TrackerCategoryStore()
-	private var trackerRecordStore = TrackerRecordStore()
-	
 	// MARK: Public properties
 	
 	var delegate: DataProviderDelegate?
@@ -36,6 +30,12 @@ final class DataProvider {
 	var trackerRecords: [TrackerRecord] {
 		trackerRecordStore.trackerRecords
 	}
+	
+	// MARK: Private properties
+	
+	private var trackerStore = TrackerStore()
+	private var trackerCategoryStore = TrackerCategoryStore()
+	private var trackerRecordStore = TrackerRecordStore()
 	
 	// MARK: Lifecycle
 	

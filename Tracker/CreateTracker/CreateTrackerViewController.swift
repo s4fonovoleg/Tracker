@@ -2,6 +2,11 @@ import UIKit
 
 final class CreateTrackerViewController: UIViewController {
 	
+	// MARK: Public properties
+	
+	var isHabit = true
+	var delegate: CreateTrackerDelegateProtocol?
+	
 	// MARK: Private properties
 	
 	private let emojiCellReuseIdentifier = "EmojiCell"
@@ -23,12 +28,7 @@ final class CreateTrackerViewController: UIViewController {
 	private var lastSelectedEmojiIndexPath: IndexPath?
 	private var lastSelectedColorIndexPath: IndexPath?
 	
-	// MARK: Public properties
-	
-	var isHabit = true
-	var delegate: CreateTrackerDelegateProtocol?
-	
-	// MARK: UI properties
+	// MARK: Private UI properties
 	
 	private lazy var scrollView = {
 		let view = UIScrollView()
@@ -97,7 +97,7 @@ final class CreateTrackerViewController: UIViewController {
 	}()
 	
 	private lazy var scheduleButton = {
-		let button = UIButton()
+		let button = UIButton(type: .custom)
 		button.translatesAutoresizingMaskIntoConstraints = false
 		button.backgroundColor = .lightGreyBackground
 		button.setTitle("Расписание", for: .normal)
@@ -423,7 +423,7 @@ extension CreateTrackerViewController: ScheduleViewControllerDelegateProtocol {
 
 extension CreateTrackerViewController: UICollectionViewDataSource {
 	func numberOfSections(in collectionView: UICollectionView) -> Int {
-		2
+		1
 	}
 	
 	func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -496,20 +496,6 @@ extension CreateTrackerViewController: UICollectionViewDelegate {
 			collectionView.reloadItems(at: indexesToReload)
 		}
 	}
-	
-//	func collectionView(_ collectionView: UICollectionView, didDeselectItemAt indexPath: IndexPath) {
-//		if collectionView == emojiCollectionView {
-//			guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: emojiCellReuseIdentifier, for: indexPath) as? EmojiViewCell else {
-//				return
-//			}
-//			
-//			cell.titleLabel.text = emojies[indexPath.row]
-//		}
-//		
-//		guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: colorCellReuseIdentifier, for: indexPath) as? ColorViewCell else {
-//			return
-//		}
-//	}
 }
 
 // MARK: UICollectionViewDelegateFlowLayout

@@ -1,6 +1,7 @@
 import UIKit
 
 final class TrackersViewController: UIViewController, CreateTrackerDelegateProtocol {
+	
 	// MARK: Private properties
 
 	private let defaultCategoryName = "Общее"
@@ -37,6 +38,7 @@ final class TrackersViewController: UIViewController, CreateTrackerDelegateProto
 		datePicker.datePickerMode = .date
 		datePicker.translatesAutoresizingMaskIntoConstraints = false
 		datePicker.locale = .current
+		datePicker.calendar.firstWeekday = 2
 		
 		return datePicker
 	}()
@@ -94,6 +96,18 @@ final class TrackersViewController: UIViewController, CreateTrackerDelegateProto
 		dataProvider.delegate = self
 		categories = dataProvider.categories
 		completedTrackers = dataProvider.trackerRecords
+	}
+	
+	// MARK: Public methods
+	
+	func trackerCreated(tracker: Tracker) {
+		if categories.isEmpty {
+			categories.append(TrackerCategory(
+				name: defaultCategoryName,
+				trackers: [Tracker]())
+			)
+		}
+		try? dataProvider.trackerCreated(tracker, in: categories[0])
 	}
 	
 	// MARK: UI methods
@@ -232,18 +246,6 @@ final class TrackersViewController: UIViewController, CreateTrackerDelegateProto
 		visibleCategories = filteredCategories
 		collectionView.reloadData()
 		updateEmptyTrackersImage()
-	}
-	
-	// MARK: Public methods
-	
-	func trackerCreated(tracker: Tracker) {
-		if categories.isEmpty {
-			categories.append(TrackerCategory(
-				name: defaultCategoryName,
-				trackers: [Tracker]())
-			)
-		}
-		try? dataProvider.trackerCreated(tracker, in: categories[0])
 	}
 }
 

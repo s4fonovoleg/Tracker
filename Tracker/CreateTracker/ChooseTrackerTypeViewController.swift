@@ -1,6 +1,7 @@
 import UIKit
 
 final class ChooseTrackerTypeViewController: UIViewController, CreateTrackerDelegateProtocol {
+	
 	// MARK: Public properties
 	
 	var delegate: CreateTrackerDelegateProtocol?
@@ -48,6 +49,13 @@ final class ChooseTrackerTypeViewController: UIViewController, CreateTrackerDele
 		view.backgroundColor = .white
 		addHeaderLabel()
 		addButtons()
+	}
+	
+	// MARK: Public methods
+	
+	func trackerCreated(tracker: Tracker) {
+		delegate?.trackerCreated(tracker: tracker)
+		self.presentingViewController?.dismiss(animated: true)
 	}
 	
 	// MARK: UI methods
@@ -107,12 +115,5 @@ final class ChooseTrackerTypeViewController: UIViewController, CreateTrackerDele
 		controller.isHabit = isHabit
 		
 		present(controller, animated: true)
-	}
-	
-	// MARK: Public methods
-	
-	func trackerCreated(tracker: Tracker) {
-		delegate?.trackerCreated(tracker: tracker)
-		self.presentingViewController?.dismiss(animated: true)
 	}
 }

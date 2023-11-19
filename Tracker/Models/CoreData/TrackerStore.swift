@@ -9,13 +9,31 @@ protocol TrackerStoreDelegate: AnyObject {
 	func didChangeTracker()
 }
 
+// MARK: TrackerStore
+
 final class TrackerStore: NSObject {
-	private var context: NSManagedObjectContext
-	private var uiColorMarshaling = UIColorMarshalling()
-	private var weekDayMarshalling = WeekDayMarshalling()
+	
+	// MARK: Public properties
 	
 	var insertedIndexes: [IndexPath]?
 	var delegate: TrackerStoreDelegate?
+	var trackers: [Tracker] {
+		guard let objects = self.fetchedResultsController.fetchedObjects else {
+			return []
+		}
+		
+		let trackers = try? objects.map { item in
+			try tracker(from: item)
+		}
+		
+		return trackers ?? []
+	}
+	
+	// MARK: Private properties
+	
+	private var context: NSManagedObjectContext
+	private var uiColorMarshaling = UIColorMarshalling()
+	private var weekDayMarshalling = WeekDayMarshalling()
 	
 	private lazy var fetchedResultsController = {
 		let request = NSFetchRequest<TrackerCoreData>(entityName: "TrackerCoreData")
@@ -34,18 +52,6 @@ final class TrackerStore: NSObject {
 		
 		return fetchedResultsController
 	}()
-	
-	var trackers: [Tracker] {
-		guard let objects = self.fetchedResultsController.fetchedObjects else {
-			return []
-		}
-		
-		let trackers = try? objects.map { item in
-			try tracker(from: item)
-		}
-		
-		return trackers ?? []
-	}
 	
 	// MARK: Lifecycle
 	

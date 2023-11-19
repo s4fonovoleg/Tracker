@@ -1,6 +1,9 @@
 import UIKit
 
 final class ColorViewCell: UICollectionViewCell {
+	
+	// MARK: Public properties
+	
 	lazy var colorView = {
 		let view = UIView(frame: CGRect(x: 0, y: 0, width: 40, height: 40))
 		view.translatesAutoresizingMaskIntoConstraints = false
@@ -18,6 +21,8 @@ final class ColorViewCell: UICollectionViewCell {
 		
 		return view
 	}()
+	
+	// MARK: Lifecycle
 	
 	override init(frame: CGRect) {
 		super.init(frame: frame)
