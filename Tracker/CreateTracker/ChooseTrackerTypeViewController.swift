@@ -1,6 +1,7 @@
 import UIKit
 
-final class CreateTrackerViewController: UIViewController, CreateTrackerDelegateProtocol {
+final class ChooseTrackerTypeViewController: UIViewController, CreateTrackerDelegateProtocol {
+	
 	// MARK: Public properties
 	
 	var delegate: CreateTrackerDelegateProtocol?
@@ -50,6 +51,13 @@ final class CreateTrackerViewController: UIViewController, CreateTrackerDelegate
 		addButtons()
 	}
 	
+	// MARK: Public methods
+	
+	func trackerCreated(tracker: Tracker) {
+		delegate?.trackerCreated(tracker: tracker)
+		self.presentingViewController?.dismiss(animated: true)
+	}
+	
 	// MARK: UI methods
 	
 	private func addHeaderLabel() {
@@ -93,25 +101,19 @@ final class CreateTrackerViewController: UIViewController, CreateTrackerDelegate
 	// MARK: Private methods
 	
 	@objc private func addHabitButtonDidTap() {
-		let controller = CreateHabitViewController()
-		controller.modalPresentationStyle = .pageSheet
-		controller.delegate = self
-		
-		present(controller, animated: true)
+		addNewTracker(isHabit: true)
 	}
 	
 	@objc private func addIrregularEventButtonDidTap() {
-		let controller = CreateIrregularEventViewController()
-		controller.modalPresentationStyle = .pageSheet
-		controller.delegate = self
-		
-		present(controller, animated: true)
+		addNewTracker(isHabit: false)
 	}
 	
-	// MARK: Public methods
-	
-	func trackerCreated(tracker: Tracker) {
-		delegate?.trackerCreated(tracker: tracker)
-		self.presentingViewController?.dismiss(animated: true)
+	private func addNewTracker(isHabit: Bool) {
+		let controller = CreateTrackerViewController()
+		controller.modalPresentationStyle = .pageSheet
+		controller.delegate = self
+		controller.isHabit = isHabit
+		
+		present(controller, animated: true)
 	}
 }

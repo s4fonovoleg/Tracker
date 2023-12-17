@@ -5,13 +5,14 @@ protocol TrackerViewCellDelegate: AnyObject {
 }
 
 final class TrackerViewCell: UICollectionViewCell {
+	
 	// MARK: Public properties
 	
 	weak var delegate: TrackerViewCellDelegate?
 	
 	var tracker: Tracker?
 	
-	var doneOnDate: Bool = false {
+	var completedOnDate: Bool = false {
 		didSet {
 			updateDoneButton()
 		}
@@ -64,7 +65,7 @@ final class TrackerViewCell: UICollectionViewCell {
 	
 	private lazy var doneButton = {
 		let symbolSize = UIImage.SymbolConfiguration(pointSize: 11)
-		let image = UIImage(systemName: doneOnDate ? "checkmark" : "plus", withConfiguration: symbolSize)
+		let image = UIImage(systemName: completedOnDate ? "checkmark" : "plus", withConfiguration: symbolSize)
 		let button = UIButton(frame: CGRect(x: 0, y: 0, width: 34, height: 34))
 		button.translatesAutoresizingMaskIntoConstraints = false
 		button.layer.cornerRadius = button.frame.width / 2
@@ -83,6 +84,42 @@ final class TrackerViewCell: UICollectionViewCell {
 		setupViews()
 		setupConstraints()
 	}
+	
+	required init?(coder: NSCoder) {
+		fatalError("init(coder:) has not been implemented")
+	}
+	
+	// MARK: Public methods
+	
+	func configure(tracker: Tracker, completedOnDate: Bool, counter: Int) {
+		self.tracker = tracker
+		self.completedOnDate = completedOnDate
+		
+		textView.text = tracker.name
+		colorView.backgroundColor = tracker.color
+		emojiBackground.backgroundColor = UIColor(white: 1, alpha: 0.3)
+		emojiLabel.text = tracker.emoji
+		doneButton.backgroundColor = tracker.color
+		
+		let daysCaption = getNumberEnding(
+			for: counter,
+			"дней",
+			"день",
+			"дня")
+		
+		countLabel.text = "\(counter) \(daysCaption)"
+		self.completedOnDate = completedOnDate
+		
+		updateDoneButton()
+	}
+	
+	func updateDoneButton() {
+		let symbolSize = UIImage.SymbolConfiguration(pointSize: 11)
+		let image = UIImage(systemName: completedOnDate ? "checkmark" : "plus", withConfiguration: symbolSize)
+		doneButton.setImage(image, for: .normal)
+	}
+	
+	// MARK: Private methods
 	
 	private func setupViews() {
 		contentView.addSubview(colorView)
@@ -124,34 +161,21 @@ final class TrackerViewCell: UICollectionViewCell {
 		])
 	}
 	
-	required init?(coder: NSCoder) {
-		fatalError("init(coder:) has not been implemented")
-	}
-	
-	// MARK: Private methods
-	
 	@objc private func doneButtonDidTap() {
 		delegate?.doneButtonDidTap(self)
 	}
 	
-	// MARK: Public methods
-	
-	func configure(tracker: Tracker, doneOnDate: Bool) {
-		self.tracker = tracker
-		self.doneOnDate = doneOnDate
+	private func getNumberEnding(for num: Int, _ firstForm: String, _ secondForm: String, _ thirdFrom: String) -> String {
+		let lastNumber = num % 10
 		
-		textView.text = tracker.name
-		colorView.backgroundColor = tracker.color
-		emojiBackground.backgroundColor = UIColor(white: 1, alpha: 0.3)
-		emojiLabel.text = tracker.emoji
-		doneButton.backgroundColor = tracker.color
+		if lastNumber == 0 || lastNumber > 4 {
+			return firstForm
+		}
 		
-		updateDoneButton()
-	}
-	
-	func updateDoneButton() {
-		let symbolSize = UIImage.SymbolConfiguration(pointSize: 11)
-		let image = UIImage(systemName: doneOnDate ? "checkmark" : "plus", withConfiguration: symbolSize)
-		doneButton.setImage(image, for: .normal)
+		if lastNumber == 1 {
+			return secondForm
+		}
+		
+		return thirdFrom
 	}
 }

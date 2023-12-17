@@ -1,7 +1,6 @@
 import UIKit
 
-final class TrackerSupplementaryView: UICollectionReusableView {
-	
+final class EmojiSupplementaryView: UICollectionReusableView{
 	// MARK: UI properties
 	
 	lazy var titleLabel = {
@@ -22,18 +21,16 @@ final class TrackerSupplementaryView: UICollectionReusableView {
 		setupTitleLabelConstraints()
 	}
 	
-	required init?(coder: NSCoder) {
-		fatalError("init(coder:) has not been implemented")
-	}
-	
-	// MARK: Private methods
-	
 	private func setupTitleLabelConstraints() {
 		NSLayoutConstraint.activate([
-			titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 12),
-			titleLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -6),
+			titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 10),
+			titleLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -10),
 			titleLabel.topAnchor.constraint(equalTo: topAnchor),
-			titleLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -12)
+			titleLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -24)
 		])
+	}
+	
+	required init?(coder: NSCoder) {
+		fatalError("init(coder:) has not been implemented")
 	}
 }
