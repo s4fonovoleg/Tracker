@@ -18,7 +18,17 @@ final class TrackerViewCell: UICollectionViewCell {
 		}
 	}
 	
-	// MARK: UI properties
+	// MARK: Private UI properties
+	
+	private lazy var countLabel = {
+		let label = UILabel()
+		label.translatesAutoresizingMaskIntoConstraints = false
+		label.text = "0 дней"
+		label.textColor = .black
+		label.font = .systemFont(ofSize: 12, weight: .medium)
+		
+		return label
+	}()
 	
 	private lazy var emojiBackground = {
 		let view = UIView(frame: CGRect(x: 0, y: 0, width: 24, height: 24))
@@ -51,16 +61,6 @@ final class TrackerViewCell: UICollectionViewCell {
 		textView.textAlignment = .left
 		
 		return textView
-	}()
-	
-	lazy var countLabel = {
-		let label = UILabel()
-		label.translatesAutoresizingMaskIntoConstraints = false
-		label.text = "0 дней"
-		label.textColor = .black
-		label.font = .systemFont(ofSize: 12, weight: .medium)
-		
-		return label
 	}()
 	
 	private lazy var doneButton = {
@@ -113,13 +113,13 @@ final class TrackerViewCell: UICollectionViewCell {
 		updateDoneButton()
 	}
 	
-	func updateDoneButton() {
+	// MARK: Private methods
+	
+	private func updateDoneButton() {
 		let symbolSize = UIImage.SymbolConfiguration(pointSize: 11)
 		let image = UIImage(systemName: completedOnDate ? "checkmark" : "plus", withConfiguration: symbolSize)
 		doneButton.setImage(image, for: .normal)
 	}
-	
-	// MARK: Private methods
 	
 	private func setupViews() {
 		contentView.addSubview(colorView)

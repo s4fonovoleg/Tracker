@@ -8,7 +8,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 		
 		container.loadPersistentStores(completionHandler: { storeDecription,error in
 			if let error = error as NSError? {
-				
+				print(error)
 			}
 		})
 		

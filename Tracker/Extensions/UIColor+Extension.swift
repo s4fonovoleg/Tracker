@@ -2,11 +2,12 @@ import UIKit
 
 extension UIColor {
 	static var ypBlue: UIColor { UIColor(named: "ypBlue") ?? .blue }
-	static var ypBlackButton: UIColor { UIColor(named: "ypBlackButton") ?? .black }
+	static var ypBlack: UIColor { UIColor(named: "ypBlack") ?? .black }
 	static var lightGreyBackground: UIColor { UIColor(named: "lightGreyBackground") ?? .lightGray }
 	static var greyDividerColor: UIColor { UIColor(named: "greyDividerColor") ?? .lightGray }
-	static var ypRedButton: UIColor { UIColor(named: "ypRedButton") ?? .red }
+	static var ypRed: UIColor { UIColor(named: "ypRed") ?? .red }
 	static var ypLightGrey: UIColor { UIColor(named: "ypLightGrey") ?? .lightGray }
+	static var ypLightGreyText: UIColor { UIColor(named: "ypLightGreyText") ?? .lightGray }
 	
 	static var trackerColor1: UIColor { UIColor(named: "TrackerColor 1") ?? .black }
 	static var trackerColor2: UIColor { UIColor(named: "TrackerColor 2") ?? .black }

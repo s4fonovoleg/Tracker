@@ -23,7 +23,7 @@ final class LaunchScreen: UIViewController {
 	
 	override func viewDidAppear(_ animated: Bool) {
 		super.viewDidAppear(animated)
-		navigateToTrackersViewController()
+		navigateToOnboardingViewController()
 	}
 	
 	// MARK: UI methods
@@ -40,26 +40,15 @@ final class LaunchScreen: UIViewController {
 	
 	// MARK: Private methods
 	
-	private func navigateToTrackersViewController() {
-		guard let window = UIApplication.shared.windows.first else { fatalError("Invalid Configuration") }
-		let navigationController = UINavigationController(rootViewController: TrackersViewController())
-		let statisticsController = StatisticsViewController()
-		let tabBarController = TabBarController()
+	private func navigateToOnboardingViewController() {
+		guard let window = UIApplication.shared.windows.first else {
+			fatalError("Invalid Configuration")
+		}
 		
-		navigationController.tabBarItem = UITabBarItem(
-			title: "Трекеры",
-			image: UIImage(named: "TrackerTabBarItemImage"),
-			selectedImage: UIImage(named: "TrackerTabBarItemSelectedImage"))
+		let onboardingVoewController = OnboardingViewController(
+			transitionStyle: .scroll,
+			navigationOrientation: .horizontal)
 		
-		statisticsController.tabBarItem = UITabBarItem(
-			title: "Статистика",
-			image: UIImage(named: "StatisticsTabBarItemImage"),
-			selectedImage: UIImage(named: "StatisticsTabBarItemSelectedImage"))
-		
-		tabBarController.viewControllers = [
-			navigationController, statisticsController
-		]
-		
-		window.rootViewController = tabBarController
+		window.rootViewController = onboardingVoewController
 	}
 }

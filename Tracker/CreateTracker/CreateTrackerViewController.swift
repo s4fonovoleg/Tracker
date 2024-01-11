@@ -1,5 +1,9 @@
 import UIKit
 
+protocol CreateTrackerDelegateProtocol {
+	func trackerCreated(tracker: Tracker, in category: TrackerCategory)
+}
+
 final class CreateTrackerViewController: UIViewController {
 	
 	// MARK: Public properties
@@ -24,7 +28,16 @@ final class CreateTrackerViewController: UIViewController {
 		.trackerColor17, .trackerColor18,
 	]
 	
-	private var weekDays: Set<WeekDay> = Set()
+	private var category: TrackerCategory? {
+		didSet {
+			updateCategoryButtonTitle()
+		}
+	}
+	private var weekDays: Set<WeekDay> = Set() {
+		didSet {
+			updateScheduleButtonTitle()
+		}
+	}
 	private var lastSelectedEmojiIndexPath: IndexPath?
 	private var lastSelectedColorIndexPath: IndexPath?
 	
@@ -73,9 +86,6 @@ final class CreateTrackerViewController: UIViewController {
 		let button = UIButton()
 		button.translatesAutoresizingMaskIntoConstraints = false
 		button.backgroundColor = .lightGreyBackground
-		button.setTitle("Категория", for: .normal)
-		button.setTitleColor(.black, for: .normal)
-		button.titleLabel?.font = .systemFont(ofSize: 16, weight: .light)
 		button.layer.cornerRadius = 16
 		button.titleEdgeInsets.left = 16
 		button.titleEdgeInsets.right = 16
@@ -85,24 +95,40 @@ final class CreateTrackerViewController: UIViewController {
 			button.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
 		}
 		
+		button.addTarget(self, action: #selector(openCategoryView), for: .touchUpInside)
+		
 		return button
 	}()
 	
-	private lazy var categoryAccessoryImageView = {
-		let accessoryImage = UIImage(named: "RightAccessoryArrow")
-		let accessoryImageView = UIImageView(image: accessoryImage)
-		accessoryImageView.translatesAutoresizingMaskIntoConstraints = false
+	private lazy var categoryButtonTitle = {
+		let label = UILabel()
+		label.translatesAutoresizingMaskIntoConstraints = false
+		label.text = "Категория"
+		label.textColor = .black
+		label.font = .systemFont(ofSize: 16, weight: .light)
 		
-		return accessoryImageView
+		return label
+	}()
+	
+	private lazy var categoryButtonSubtitle = {
+		let label = UILabel()
+		label.translatesAutoresizingMaskIntoConstraints = false
+		label.textColor = .ypLightGreyText
+		label.font = .systemFont(ofSize: 16, weight: .light)
+		
+		return label
+	}()
+	
+	private var categoryButtonTitleVerticalConstraint: NSLayoutConstraint?
+	
+	private lazy var categoryAccessoryImageView = {
+		getRightAccesoryArrow()
 	}()
 	
 	private lazy var scheduleButton = {
 		let button = UIButton(type: .custom)
 		button.translatesAutoresizingMaskIntoConstraints = false
 		button.backgroundColor = .lightGreyBackground
-		button.setTitle("Расписание", for: .normal)
-		button.setTitleColor(.black, for: .normal)
-		button.titleLabel?.font = .systemFont(ofSize: 16, weight: .light)
 		button.layer.cornerRadius = 16
 		button.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
 		button.contentHorizontalAlignment = .leading
@@ -113,12 +139,29 @@ final class CreateTrackerViewController: UIViewController {
 		return button
 	}()
 	
-	private lazy var scheduleAccessoryImageView = {
-		let accessoryImage = UIImage(named: "RightAccessoryArrow")
-		let accessoryImageView = UIImageView(image: accessoryImage)
-		accessoryImageView.translatesAutoresizingMaskIntoConstraints = false
+	private lazy var scheduleButtonTitle = {
+		let label = UILabel()
+		label.translatesAutoresizingMaskIntoConstraints = false
+		label.text = "Расписание"
+		label.textColor = .black
+		label.font = .systemFont(ofSize: 16, weight: .light)
 		
-		return accessoryImageView
+		return label
+	}()
+	
+	private lazy var scheduleButtonSubtitle = {
+		let label = UILabel()
+		label.translatesAutoresizingMaskIntoConstraints = false
+		label.textColor = .ypLightGreyText
+		label.font = .systemFont(ofSize: 16, weight: .light)
+		
+		return label
+	}()
+	
+	private var scheduleButtonTitleVerticalConstraint: NSLayoutConstraint?
+	
+	private lazy var scheduleAccessoryImageView = {
+		getRightAccesoryArrow()
 	}()
 	
 	private lazy var divider = {
@@ -135,10 +178,10 @@ final class CreateTrackerViewController: UIViewController {
 		button.translatesAutoresizingMaskIntoConstraints = false
 		button.backgroundColor = .white
 		button.setTitle("Отменить", for: .normal)
-		button.setTitleColor(.ypRedButton, for: .normal)
+		button.setTitleColor(.ypRed, for: .normal)
 		button.layer.cornerRadius = 16
 		button.layer.borderWidth = 1
-		button.layer.borderColor = UIColor.ypRedButton.cgColor
+		button.layer.borderColor = UIColor.ypRed.cgColor
 		button.addTarget(self, action: #selector(cancelButtonDidTap), for: .touchUpInside)
 		
 		return button
@@ -147,7 +190,7 @@ final class CreateTrackerViewController: UIViewController {
 	private lazy var createButton = {
 		let button = UIButton()
 		button.translatesAutoresizingMaskIntoConstraints = false
-		button.backgroundColor = .ypBlackButton
+		button.backgroundColor = .ypBlack
 		button.setTitle("Создать", for: .normal)
 		button.setTitleColor(.white, for: .normal)
 		button.layer.cornerRadius = 16
@@ -192,11 +235,15 @@ final class CreateTrackerViewController: UIViewController {
 		contentView.addSubview(trackerNameTextField)
 		contentView.addSubview(categoryButton)
 		contentView.insertSubview(categoryAccessoryImageView, belowSubview: categoryButton)
+		categoryButton.addSubview(categoryButtonTitle)
+		categoryButton.addSubview(categoryButtonSubtitle)
 		
 		if isHabit {
 			categoryButton.addSubview(divider)
 			contentView.addSubview(scheduleButton)
 			contentView.insertSubview(scheduleAccessoryImageView, belowSubview: scheduleButton)
+			scheduleButton.addSubview(scheduleButtonTitle)
+			scheduleButton.addSubview(scheduleButtonSubtitle)
 		}
 		
 		contentView.addSubview(emojiCollectionView)
@@ -285,8 +332,16 @@ final class CreateTrackerViewController: UIViewController {
 			categoryAccessoryImageView.centerYAnchor.constraint(equalTo: categoryButton.centerYAnchor),
 			categoryAccessoryImageView.trailingAnchor.constraint(equalTo: categoryButton.trailingAnchor, constant: -16),
 			categoryAccessoryImageView.widthAnchor.constraint(equalToConstant: 24),
-			categoryAccessoryImageView.heightAnchor.constraint(equalToConstant: 24)
+			categoryAccessoryImageView.heightAnchor.constraint(equalToConstant: 24),
+			
+			categoryButtonTitle.leadingAnchor.constraint(equalTo: categoryButton.leadingAnchor, constant: 16),
+			
+			categoryButtonSubtitle.leadingAnchor.constraint(equalTo: categoryButton.leadingAnchor, constant: 16),
+			categoryButtonSubtitle.bottomAnchor.constraint(equalTo: categoryButton.bottomAnchor, constant: -14)
 		])
+		
+		categoryButtonTitleVerticalConstraint = categoryButtonTitle.centerYAnchor.constraint(equalTo: categoryButton.centerYAnchor)
+		categoryButtonTitleVerticalConstraint?.isActive = true
 	}
 	
 	private func setupDividerConstraints() {
@@ -310,8 +365,16 @@ final class CreateTrackerViewController: UIViewController {
 			scheduleAccessoryImageView.centerYAnchor.constraint(equalTo: scheduleButton.centerYAnchor),
 			scheduleAccessoryImageView.trailingAnchor.constraint(equalTo: scheduleButton.trailingAnchor, constant: -16),
 			scheduleAccessoryImageView.widthAnchor.constraint(equalToConstant: 24),
-			scheduleAccessoryImageView.heightAnchor.constraint(equalToConstant: 24)
+			scheduleAccessoryImageView.heightAnchor.constraint(equalToConstant: 24),
+			
+			scheduleButtonTitle.leadingAnchor.constraint(equalTo: scheduleButton.leadingAnchor, constant: 16),
+			
+			scheduleButtonSubtitle.leadingAnchor.constraint(equalTo: scheduleButton.leadingAnchor, constant: 16),
+			scheduleButtonSubtitle.bottomAnchor.constraint(equalTo: scheduleButton.bottomAnchor, constant: -14)
 		])
+		
+		scheduleButtonTitleVerticalConstraint = scheduleButtonTitle.centerYAnchor.constraint(equalTo: scheduleButton.centerYAnchor)
+		scheduleButtonTitleVerticalConstraint?.isActive = true
 	}
 	
 	private func setupEmojiCollectionViewConstraints() {
@@ -360,7 +423,51 @@ final class CreateTrackerViewController: UIViewController {
 		])
 	}
 	
+	private func getRightAccesoryArrow() -> UIImageView {
+		let accessoryImage = UIImage(named: "RightAccessoryArrow")
+		let accessoryImageView = UIImageView(image: accessoryImage)
+		accessoryImageView.translatesAutoresizingMaskIntoConstraints = false
+		
+		return accessoryImageView
+	}
+	
+	private func updateCategoryButtonTitle() {
+		categoryButtonTitleVerticalConstraint?.isActive = false
+		
+		if (category != nil) {
+			categoryButtonTitleVerticalConstraint = categoryButtonTitle.bottomAnchor.constraint(equalTo: categoryButton.bottomAnchor, constant: -38)
+			categoryButtonSubtitle.text = category?.name
+		} else {
+			categoryButtonTitleVerticalConstraint = categoryButtonTitle.centerYAnchor.constraint(equalTo: categoryButton.centerYAnchor)
+			categoryButtonSubtitle.text = ""
+		}
+		
+		categoryButtonTitleVerticalConstraint?.isActive = true
+	}
+	
+	private func updateScheduleButtonTitle() {
+		scheduleButtonTitleVerticalConstraint?.isActive = false
+		
+		if (weekDays.count > 0) {
+			scheduleButtonTitleVerticalConstraint = scheduleButtonTitle.bottomAnchor.constraint(equalTo: scheduleButton.bottomAnchor, constant: -38)
+			scheduleButtonSubtitle.text = getWeekDaysShortNames()
+		} else {
+			scheduleButtonTitleVerticalConstraint = scheduleButtonTitle.centerYAnchor.constraint(equalTo: scheduleButton.centerYAnchor)
+			scheduleButtonSubtitle.text = ""
+		}
+		
+		scheduleButtonTitleVerticalConstraint?.isActive = true
+	}
+	
 	// MARK: Private methods
+	
+	private func getWeekDaysShortNames() -> String {
+		var shortNames = weekDays.map { item in
+			weekDayShortName[item] ?? ""
+		}
+		
+		return shortNames.joined(separator: ", ")
+	}
 	
 	@objc private func cancelButtonDidTap() {
 		dismiss(animated: true)
@@ -368,7 +475,8 @@ final class CreateTrackerViewController: UIViewController {
 	
 	@objc private func createButtonDidTap() {
 		guard let emojiIndex = lastSelectedEmojiIndexPath?.row,
-			  let colorIndex = lastSelectedColorIndexPath?.row else {
+			  let colorIndex = lastSelectedColorIndexPath?.row,
+			  let category else {
 			return
 		}
 		
@@ -380,7 +488,8 @@ final class CreateTrackerViewController: UIViewController {
 			name: trackerNameTextField.text ?? "",
 			color: color,
 			emoji: emoji,
-			weekDays: getWeekDays())
+			weekDays: getWeekDays()),
+			in: category
 		)
 		dismiss(animated: true)
 	}
@@ -390,6 +499,14 @@ final class CreateTrackerViewController: UIViewController {
 		controller.modalPresentationStyle = .pageSheet
 		controller.delegate = self
 		controller.weekDays = weekDays
+		
+		present(controller, animated: true)
+	}
+	
+	@objc private func openCategoryView() {
+		let controller = CategoryViewController()
+		controller.modalPresentationStyle = .pageSheet
+		controller.delegate = self
 		
 		present(controller, animated: true)
 	}
@@ -487,7 +604,7 @@ extension CreateTrackerViewController: UICollectionViewDelegate {
 			collectionView.reloadItems(at: indexesToReload)
 		} else {
 			let indexesToReload = [indexPath, lastSelectedColorIndexPath].compactMap({ $0 })
-		
+			
 			if lastSelectedColorIndexPath == indexPath {
 				lastSelectedColorIndexPath = nil
 			} else {
@@ -525,5 +642,13 @@ extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
 			height: UIView.layoutFittingExpandedSize.height),
 			withHorizontalFittingPriority: .required,
 			verticalFittingPriority: .fittingSizeLevel)
+	}
+}
+
+// MARK: CategoryViewControllerDelegate
+
+extension CreateTrackerViewController: CategoryViewControllerDelegate {
+	func categorySelected(_ category: TrackerCategory) {
+		self.category = category
 	}
 }

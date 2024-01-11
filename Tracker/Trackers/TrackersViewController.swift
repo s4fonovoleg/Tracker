@@ -1,6 +1,6 @@
 import UIKit
 
-final class TrackersViewController: UIViewController, CreateTrackerDelegateProtocol {
+final class TrackersViewController: UIViewController {
 	
 	// MARK: Private properties
 
@@ -62,7 +62,7 @@ final class TrackersViewController: UIViewController, CreateTrackerDelegateProto
 	}()
 	
 	private lazy var emptyTrackersImageView = {
-		let image = UIImage(named: "EmptyTrackersImage")
+		let image = UIImage(named: "EmptyListImage")
 		let view = UIImageView(image: image)
 		
 		view.translatesAutoresizingMaskIntoConstraints = false
@@ -96,18 +96,6 @@ final class TrackersViewController: UIViewController, CreateTrackerDelegateProto
 		dataProvider.delegate = self
 		categories = dataProvider.categories
 		completedTrackers = dataProvider.trackerRecords
-	}
-	
-	// MARK: Public methods
-	
-	func trackerCreated(tracker: Tracker) {
-		if categories.isEmpty {
-			categories.append(TrackerCategory(
-				name: defaultCategoryName,
-				trackers: [Tracker]())
-			)
-		}
-		try? dataProvider.trackerCreated(tracker, in: categories[0])
 	}
 	
 	// MARK: UI methods
@@ -252,6 +240,10 @@ final class TrackersViewController: UIViewController, CreateTrackerDelegateProto
 // MARK: UICollectionViewDataSource
 
 extension TrackersViewController: UICollectionViewDataSource {
+	func numberOfSections(in collectionView: UICollectionView) -> Int {
+		visibleCategories.count
+	}
+	
 	func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
 		let num = visibleCategories.count - 1 < section ? 0 : visibleCategories[section].trackers.count
 		print(visibleCategories.count - 1 < section)
@@ -303,7 +295,7 @@ extension TrackersViewController: TrackerViewCellDelegate {
 		}
 		
 		let trackerRecord = TrackerRecord(trackerId: tracker.id, date: date)
-		var completedToday = completedTrackers.filter { trackerRecord in
+		let completedToday = completedTrackers.filter { trackerRecord in
 			trackerRecord.trackerId == tracker.id &&
 			trackerRecord.date == date
 		}.count > 0
@@ -367,5 +359,14 @@ extension TrackersViewController: DataProviderDelegate {
 	
 	func didChangeTrackerRecord() {
 		completedTrackers = dataProvider.trackerRecords
+	}
+}
+
+// MARK: CreateTrackerDelegateProtocol
+
+extension TrackersViewController: CreateTrackerDelegateProtocol {
+	func trackerCreated(tracker: Tracker, in category: TrackerCategory) {
+		try? dataProvider.trackerCreated(tracker, in: category)
+		self.collectionView.reloadData()
 	}
 }

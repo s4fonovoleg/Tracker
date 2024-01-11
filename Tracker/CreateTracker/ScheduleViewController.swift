@@ -1,5 +1,9 @@
 import UIKit
 
+protocol ScheduleViewControllerDelegateProtocol {
+	func addSchedule(weekDays: Set<WeekDay>)
+}
+
 final class ScheduleViewController: UIViewController {
 	
 	// MARK: Public properties
@@ -28,7 +32,7 @@ final class ScheduleViewController: UIViewController {
 	private lazy var doneButton = {
 		let button = UIButton()
 		button.translatesAutoresizingMaskIntoConstraints = false
-		button.backgroundColor = .ypBlackButton
+		button.backgroundColor = .ypBlack
 		button.setTitle("Готово", for: .normal)
 		button.setTitleColor(.white, for: .normal)
 		button.layer.cornerRadius = 16
