@@ -462,11 +462,9 @@ final class CreateTrackerViewController: UIViewController {
 	// MARK: Private methods
 	
 	private func getWeekDaysShortNames() -> String {
-		var shortNames = weekDays.map { item in
+		weekDays.map { item in
 			weekDayShortName[item] ?? ""
-		}
-		
-		return shortNames.joined(separator: ", ")
+		}.joined(separator: ", ")
 	}
 	
 	@objc private func cancelButtonDidTap() {

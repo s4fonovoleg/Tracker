@@ -105,6 +105,8 @@ final class OnboardingViewController: UIPageViewController {
 			fatalError("Invalid Configuration")
 		}
 		
+		UserDefaults.standard.set(true, forKey: "SkipOnboarding")
+		
 		let navigationController = UINavigationController(rootViewController: TrackersViewController())
 		let statisticsController = StatisticsViewController()
 		let tabBarController = TabBarController()
@@ -130,7 +132,10 @@ final class OnboardingViewController: UIPageViewController {
 // MARK: UIPageViewControllerDataSource
 
 extension OnboardingViewController: UIPageViewControllerDataSource {
-	func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
+	func pageViewController(
+		_ pageViewController: UIPageViewController,
+		viewControllerBefore viewController: UIViewController
+	) -> UIViewController? {
 		guard let index = pages.firstIndex(of: viewController) else {
 			return nil
 		}
@@ -144,7 +149,10 @@ extension OnboardingViewController: UIPageViewControllerDataSource {
 		return pages[newIndex]
 	}
 	
-	func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
+	func pageViewController(
+		_ pageViewController: UIPageViewController,
+		viewControllerAfter viewController: UIViewController
+	) -> UIViewController? {
 		guard let index = pages.firstIndex(of: viewController) else {
 			return nil
 		}
@@ -162,7 +170,12 @@ extension OnboardingViewController: UIPageViewControllerDataSource {
 // MARK: UIPageViewControllerDelegate
 
 extension OnboardingViewController: UIPageViewControllerDelegate {
-	func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
+	func pageViewController(
+		_ pageViewController: UIPageViewController,
+		didFinishAnimating finished: Bool,
+		previousViewControllers: [UIViewController],
+		transitionCompleted completed: Bool
+	) {
 		guard let currentViewController = pageViewController.viewControllers?.first,
 			  let currentIndex = pages.firstIndex(of: currentViewController) else {
 			return
