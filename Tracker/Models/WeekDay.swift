@@ -20,6 +20,16 @@ let weekDayName: [WeekDay: String] = [
 	.sunday: "Воскресенье"
 ]
 
+let weekDayShortName: [WeekDay: String] = [
+	.monday: "Пн",
+	.thuesday: "Вт",
+	.wednesday: "Ср",
+	.thursday: "Чт",
+	.friday: "Пт",
+	.saturday: "Сб",
+	.sunday: "Вс"
+]
+
 extension WeekDay: Decodable, Encodable {
 	
 }

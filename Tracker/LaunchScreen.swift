@@ -23,7 +23,14 @@ final class LaunchScreen: UIViewController {
 	
 	override func viewDidAppear(_ animated: Bool) {
 		super.viewDidAppear(animated)
-		navigateToTrackersViewController()
+		
+		let skipOnboarding = UserDefaults.standard.bool(forKey: "SkipOnboarding")
+		
+		if skipOnboarding {
+			navigateToTrackersViewController()
+		} else {
+			navigateToOnboardingViewController()
+		}
 	}
 	
 	// MARK: UI methods
@@ -40,8 +47,23 @@ final class LaunchScreen: UIViewController {
 	
 	// MARK: Private methods
 	
+	private func navigateToOnboardingViewController() {
+		guard let window = UIApplication.shared.windows.first else {
+			fatalError("Invalid Configuration")
+		}
+		
+		let onboardingVoewController = OnboardingViewController(
+			transitionStyle: .scroll,
+			navigationOrientation: .horizontal)
+		
+		window.rootViewController = onboardingVoewController
+	}
+	
 	private func navigateToTrackersViewController() {
-		guard let window = UIApplication.shared.windows.first else { fatalError("Invalid Configuration") }
+		guard let window = UIApplication.shared.windows.first else {
+			fatalError("Invalid Configuration")
+		}
+		
 		let navigationController = UINavigationController(rootViewController: TrackersViewController())
 		let statisticsController = StatisticsViewController()
 		let tabBarController = TabBarController()

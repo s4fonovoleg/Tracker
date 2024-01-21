@@ -1,6 +1,6 @@
 import UIKit
 
-final class ChooseTrackerTypeViewController: UIViewController, CreateTrackerDelegateProtocol {
+final class ChooseTrackerTypeViewController: UIViewController {
 	
 	// MARK: Public properties
 	
@@ -21,7 +21,7 @@ final class ChooseTrackerTypeViewController: UIViewController, CreateTrackerDele
 	private lazy var addHabitButton = {
 		let button = UIButton()
 		button.translatesAutoresizingMaskIntoConstraints = false
-		button.backgroundColor = .ypBlackButton
+		button.backgroundColor = .ypBlack
 		button.setTitle("Привычка", for: .normal)
 		button.setTitleColor(.white, for: .normal)
 		button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
@@ -33,7 +33,7 @@ final class ChooseTrackerTypeViewController: UIViewController, CreateTrackerDele
 	private lazy var addIrregularEventButton = {
 		let button = UIButton(type: .system)
 		button.translatesAutoresizingMaskIntoConstraints = false
-		button.backgroundColor = .ypBlackButton
+		button.backgroundColor = .ypBlack
 		button.setTitle("Нерегулярное событие", for: .normal)
 		button.setTitleColor(.white, for: .normal)
 		button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
@@ -49,13 +49,6 @@ final class ChooseTrackerTypeViewController: UIViewController, CreateTrackerDele
 		view.backgroundColor = .white
 		addHeaderLabel()
 		addButtons()
-	}
-	
-	// MARK: Public methods
-	
-	func trackerCreated(tracker: Tracker) {
-		delegate?.trackerCreated(tracker: tracker)
-		self.presentingViewController?.dismiss(animated: true)
 	}
 	
 	// MARK: UI methods
@@ -115,5 +108,12 @@ final class ChooseTrackerTypeViewController: UIViewController, CreateTrackerDele
 		controller.isHabit = isHabit
 		
 		present(controller, animated: true)
+	}
+}
+
+extension ChooseTrackerTypeViewController: CreateTrackerDelegateProtocol {
+	func trackerCreated(tracker: Tracker, in category: TrackerCategory) {
+		delegate?.trackerCreated(tracker: tracker, in: category)
+		self.presentingViewController?.dismiss(animated: true)
 	}
 }
