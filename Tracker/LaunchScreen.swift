@@ -69,12 +69,12 @@ final class LaunchScreen: UIViewController {
 		let tabBarController = TabBarController()
 		
 		navigationController.tabBarItem = UITabBarItem(
-			title: "Трекеры",
+			title: NSLocalizedString("trackers", comment: "Название экрана с трекерами"),
 			image: UIImage(named: "TrackerTabBarItemImage"),
 			selectedImage: UIImage(named: "TrackerTabBarItemSelectedImage"))
 		
 		statisticsController.tabBarItem = UITabBarItem(
-			title: "Статистика",
+			title: NSLocalizedString("statistics", comment: "Название экрана статистики"),
 			image: UIImage(named: "StatisticsTabBarItemImage"),
 			selectedImage: UIImage(named: "StatisticsTabBarItemSelectedImage"))
 		

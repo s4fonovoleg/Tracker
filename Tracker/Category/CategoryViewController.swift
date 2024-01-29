@@ -8,19 +8,18 @@ final class CategoryViewController: UIViewController {
 	
 	// MARK: Public properties
 	
+	var viewModel: CategoriesViewModel?
 	var delegate: CategoryViewControllerDelegate?
 	
 	// MARK: Private properties
 	
 	private let reuseIdentifier = "cell"
 	
-	private let viewModel = CategoriesViewModel()
-	
 	// MARK: Private UI properties
 	
 	private lazy var headerLabel = {
 		let label = UILabel()
-		label.text = "Категория"
+		label.text = NSLocalizedString("category", comment: "Заголовок экрана категорий")
 		label.textColor = .black
 		label.font = .systemFont(ofSize: 16, weight: .medium)
 		label.translatesAutoresizingMaskIntoConstraints = false
@@ -47,10 +46,10 @@ final class CategoryViewController: UIViewController {
 	
 	private lazy var emptyCategoriesLabel = {
 		let label = UILabel()
-		label.text = """
-					Привычки и события можно
-					объединить по смыслу
-					"""
+		label.text = NSLocalizedString(
+			"emptyCategoriesLabel",
+			comment: "Сообщение при пустом списке категорий"
+		)
 		label.font = .systemFont(ofSize: 12, weight: .medium)
 		label.textColor = .black
 		label.translatesAutoresizingMaskIntoConstraints = false
@@ -64,7 +63,13 @@ final class CategoryViewController: UIViewController {
 		let button = UIButton()
 		button.translatesAutoresizingMaskIntoConstraints = false
 		button.backgroundColor = .ypBlack
-		button.setTitle("Добавить категорию", for: .normal)
+		button.setTitle(
+			NSLocalizedString(
+				"addCategory",
+				comment: "Заголовок кнопки добавления категории"
+			),
+			for: .normal
+		)
 		button.setTitleColor(.white, for: .normal)
 		button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
 		button.layer.cornerRadius = 16
@@ -80,9 +85,10 @@ final class CategoryViewController: UIViewController {
 		
 		setupViews()
 		setupConstraints()
+		updateEmptyCategoriesImage()
 		
-		viewModel.$categories.bind(action: { _ in
-			self.tableView.reloadData()
+		viewModel?.$categories.bind(action: { _ in
+			self.onCategoriesChanged()
 		})
 	}
 	
@@ -99,7 +105,10 @@ final class CategoryViewController: UIViewController {
 		
 		tableView.dataSource = self
 		tableView.delegate = self
-		tableView.register(CategoryTableViewCell.self, forCellReuseIdentifier: reuseIdentifier)
+		tableView.register(
+			CategoryTableViewCell.self,
+			forCellReuseIdentifier: reuseIdentifier
+		)
 	}
 	
 	private func setupConstraints() {
@@ -163,25 +172,45 @@ final class CategoryViewController: UIViewController {
 		delegate?.categorySelected(category)
 		dismiss(animated: true)
 	}
+	
+	private func onCategoriesChanged() {
+		tableView.reloadData()
+		updateEmptyCategoriesImage()
+	}
+	
+	private func updateEmptyCategoriesImage() {
+		var isHidden = false
+		
+		if let viewModel {
+			isHidden = viewModel.categories.count > 0
+		}
+		
+		emptyCategoriesImageView.isHidden = isHidden
+		emptyCategoriesLabel.isHidden = isHidden
+	}
 }
 
 // MARK: UITableViewDataSource
 
 extension CategoryViewController: UITableViewDataSource {
 	func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-		viewModel.categories.count
+		viewModel?.categories.count ?? 0
 	}
 	
 	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-		guard let cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier, for: indexPath) as? CategoryTableViewCell else {
+		guard let cell = tableView.dequeueReusableCell(
+			withIdentifier: reuseIdentifier,
+			for: indexPath
+		) as? CategoryTableViewCell,
+			  let viewModel else {
 			return CategoryTableViewCell()
 		}
 		
-		var viewModel = viewModel.categories[indexPath.item]
-		viewModel.first = indexPath.item == 0
-		viewModel.last = indexPath.item + 1 == self.viewModel.categories.count
+		var categoryViewModel = viewModel.categories[indexPath.item]
+		categoryViewModel.first = indexPath.item == 0
+		categoryViewModel.last = indexPath.item + 1 == viewModel.categories.count
 		
-		cell.viewModel = viewModel
+		cell.viewModel = categoryViewModel
 		
 		return cell
 	}
@@ -195,6 +224,9 @@ extension CategoryViewController: UITableViewDelegate {
 	}
 	
 	func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+		guard let viewModel else {
+			return
+		}
 		let category = viewModel.didSelectRow(index: indexPath.item)
 		
 		categorySelected(category)
@@ -205,6 +237,6 @@ extension CategoryViewController: UITableViewDelegate {
 
 extension CategoryViewController: CreateCategoryDelegateProtocol {
 	func categoryCreated(name: String) {
-		viewModel.createCategory(name: name)
+		viewModel?.createCategory(name: name)
 	}
 }

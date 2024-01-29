@@ -10,7 +10,10 @@ final class ChooseTrackerTypeViewController: UIViewController {
 	
 	private lazy var headerLabel = {
 		let label = UILabel()
-		label.text = "Создание трекера"
+		label.text = NSLocalizedString(
+			"creatingTracker",
+			comment: "Заголовок создания трекера"
+		)
 		label.textColor = .black
 		label.font = .systemFont(ofSize: 16, weight: .medium)
 		label.translatesAutoresizingMaskIntoConstraints = false
@@ -22,7 +25,13 @@ final class ChooseTrackerTypeViewController: UIViewController {
 		let button = UIButton()
 		button.translatesAutoresizingMaskIntoConstraints = false
 		button.backgroundColor = .ypBlack
-		button.setTitle("Привычка", for: .normal)
+		button.setTitle(
+			NSLocalizedString(
+				"habit",
+				comment: "Заголовок кнопки создания привычки"
+			),
+			for: .normal
+		)
 		button.setTitleColor(.white, for: .normal)
 		button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
 		button.layer.cornerRadius = 16
@@ -34,7 +43,13 @@ final class ChooseTrackerTypeViewController: UIViewController {
 		let button = UIButton(type: .system)
 		button.translatesAutoresizingMaskIntoConstraints = false
 		button.backgroundColor = .ypBlack
-		button.setTitle("Нерегулярное событие", for: .normal)
+		button.setTitle(
+			NSLocalizedString(
+				"irregularEvent",
+				comment: "Заголовок кнопки создания нерегулярного события"
+			),
+			for: .normal
+		)
 		button.setTitleColor(.white, for: .normal)
 		button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
 		button.layer.cornerRadius = 16
@@ -112,6 +127,11 @@ final class ChooseTrackerTypeViewController: UIViewController {
 }
 
 extension ChooseTrackerTypeViewController: CreateTrackerDelegateProtocol {
+	func editTracker(tracker: Tracker, in category: TrackerCategory) {
+		delegate?.editTracker(tracker: tracker, in: category)
+		self.presentingViewController?.dismiss(animated: true)
+	}
+	
 	func trackerCreated(tracker: Tracker, in category: TrackerCategory) {
 		delegate?.trackerCreated(tracker: tracker, in: category)
 		self.presentingViewController?.dismiss(animated: true)

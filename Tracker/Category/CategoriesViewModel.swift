@@ -12,6 +12,7 @@ final class CategoriesViewModel {
 	// MARK: Public properties
 	
 	var lastSelectedIndex: Int?
+	var selectedCategory: TrackerCategory?
 	
 	// MARK: Lifecycle
 	
@@ -19,10 +20,20 @@ final class CategoriesViewModel {
 		initCategories()
 	}
 	
+	init(selectedCategory: TrackerCategory?) {
+		self.selectedCategory = selectedCategory
+		initCategories()
+	}
+	
 	// MARK: Public methods
 	
 	func createCategory(name: String) {
-		let category = TrackerCategory(name: name, trackers: [])
+		let category = TrackerCategory(
+			id: UUID(),
+			name: name,
+			position: categories.count + 1,
+			trackers: []
+		)
 		try? categoryStore.addNewTrackerCategoryIfNotExists(category)
 		
 		initCategories()
@@ -49,8 +60,16 @@ final class CategoriesViewModel {
 	}
 	
 	private func getCategories() -> [CategoryViewModel] {
-		categoryStore.categories.map { category in
-			CategoryViewModel(category: category, name: category.name)
+		let categoryViewModels = categoryStore.categories.map { category in
+			CategoryViewModel(
+				category: category,
+				name: category.name,
+				checked: category.name == selectedCategory?.name
+			)
 		}
+		
+		return categoryViewModels.filter({ categoryViewModel in
+			categoryViewModel.category.id != pinnedCategoryId
+		})
 	}
 }

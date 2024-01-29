@@ -3,6 +3,7 @@ import UIKit
 
 enum DataProviderError: Error {
 	case trackerCategoryAddingError
+	case trackerCategoryFetchingError
 }
 
 protocol DataProviderDelegate {
@@ -61,6 +62,51 @@ final class DataProvider {
 		} else {
 			trackerRecordStore.deleteTrackerRecord(trackerRecord)
 		}
+	}
+	
+	func pinTracker(tracker: Tracker, category: TrackerCategory) throws {
+		guard let pinnedCategoryId else {
+			return
+		}
+		let pinnedCategory = TrackerCategory(
+			id: pinnedCategoryId,
+			name: NSLocalizedString(
+				"pinnedCategory",
+				comment: "Название категории с закрепленными трекерами"
+			),
+			position: 0,
+			trackers: []
+		)
+		
+		guard let categoryCoreData = try? trackerCategoryStore.addNewTrackerCategoryIfNotExists(pinnedCategory) else {
+			throw DataProviderError.trackerCategoryAddingError
+		}
+		
+		guard let oldCategory = trackerCategoryStore.categoryCoreData(with: category.name) else {
+			throw DataProviderError.trackerCategoryFetchingError
+		}
+		
+		trackerStore.pinTracker(
+			tracker: tracker,
+			pinnedCategory: categoryCoreData,
+			oldCategory: oldCategory
+		)
+	}
+	
+	func unpinTracker(tracker: Tracker) {
+		trackerStore.unpinTracker(tracker: tracker)
+	}
+	
+	func editTracker(_ tracker: Tracker, in category: TrackerCategory) throws {
+		guard let categoryCoreData = try? trackerCategoryStore.addNewTrackerCategoryIfNotExists(category) else {
+			throw DataProviderError.trackerCategoryAddingError
+		}
+		
+		trackerStore.editTracker(tracker, category: categoryCoreData)
+	}
+	
+	func deleteTracker(_ tracker: Tracker) {
+		trackerStore.deleteTracker(tracker)
 	}
 }
 

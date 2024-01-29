@@ -1,23 +1,16 @@
 import UIKit
 
-final class CategoryTableViewCell: UITableViewCell {
-	
-	// MARK: Public properties
-	
-	var viewModel: CategoryViewModel? {
-		didSet {
-			guard let viewModel else {
-				return
-			}
-			
-			nameLabel.text = viewModel.name
-			checkmark.isHidden = !viewModel.checked
-			setupMaskedCorners()
-			setupDivider()
-		}
-	}
+final class FiltersTableViewCell: UITableViewCell {
 	
 	// MARK: Private properties
+	
+	private var first = false
+	private var last = false
+	private var checked = false {
+		didSet {
+			checkmark.isHidden = !checked
+		}
+	}
 	
 	private let nameLabel = {
 		let label = UILabel()
@@ -81,22 +74,18 @@ final class CategoryTableViewCell: UITableViewCell {
 	}
 	
 	private func setupMaskedCorners() {
-		guard let viewModel else {
-			return
-		}
-		
-		if viewModel.first && viewModel.last {
+		if first && last {
 			contentView.layer.cornerRadius = 16
 			return
 		}
 		
-		if viewModel.first {
+		if first {
 			contentView.layer.cornerRadius = 16
 			contentView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
 			return
 		}
 		
-		if viewModel.last {
+		if last {
 			contentView.layer.cornerRadius = 16
 			contentView.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
 			return
@@ -104,9 +93,8 @@ final class CategoryTableViewCell: UITableViewCell {
 	}
 	
 	private func setupDivider() {
-		guard let viewModel,
-			!(viewModel.first && viewModel.last),
-			!viewModel.last else {
+		guard !(first && last),
+			  !last else {
 			return
 		}
 		
@@ -118,5 +106,17 @@ final class CategoryTableViewCell: UITableViewCell {
 			divider.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -15.95),
 			divider.heightAnchor.constraint(equalToConstant: 0.5)
 		])
+	}
+	
+	// MARK: Public methods
+	
+	func configure(title: String, first: Bool, last: Bool, checked: Bool) {
+		self.nameLabel.text = title
+		self.first = first
+		self.last = last
+		self.checked = checked
+		
+		setupMaskedCorners()
+		setupDivider()
 	}
 }
