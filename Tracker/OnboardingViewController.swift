@@ -107,7 +107,9 @@ final class OnboardingViewController: UIPageViewController {
 		
 		UserDefaults.standard.set(true, forKey: "SkipOnboarding")
 		
-		let navigationController = UINavigationController(rootViewController: TrackersViewController())
+		let trackersViewController = TrackersViewController()
+		trackersViewController.dataProvider = DataProvider()
+		let navigationController = UINavigationController(rootViewController: trackersViewController)
 		let statisticsController = StatisticsViewController()
 		let tabBarController = TabBarController()
 		

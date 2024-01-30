@@ -6,6 +6,18 @@ enum DataProviderError: Error {
 	case trackerCategoryFetchingError
 }
 
+protocol DataProviderProtocol {
+	var delegate: DataProviderDelegate? { get set }
+	var categories: [TrackerCategory] { get }
+	var trackerRecords: [TrackerRecord] { get }
+	func setTrackerRecord(_ trackerRecord: TrackerRecord, completed: Bool)
+	func pinTracker(tracker: Tracker, category: TrackerCategory) throws
+	func unpinTracker(tracker: Tracker)
+	func deleteTracker(_ tracker: Tracker)
+	func trackerCreated(_ tracker: Tracker, in category: TrackerCategory) throws
+	func editTracker(_ tracker: Tracker, in category: TrackerCategory) throws
+}
+
 protocol DataProviderDelegate {
 	func didChangeCategory()
 	func didChangeTracker()
@@ -14,7 +26,7 @@ protocol DataProviderDelegate {
 
 // MARK: DataProvider
 
-final class DataProvider {
+final class DataProvider: DataProviderProtocol {
 	
 	// MARK: Public properties
 	

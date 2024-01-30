@@ -2,8 +2,12 @@ import UIKit
 
 final class TrackersViewController: UIViewController {
 	
+	// MARK: Public properties
+	
+	var dataProvider: DataProviderProtocol?
+	
 	// MARK: Private properties
-
+	
 	private var currentFilterIndex = 0 {
 		didSet {
 			if currentFilterIndex == 1 {
@@ -38,13 +42,15 @@ final class TrackersViewController: UIViewController {
 		}
 	}
 	
-	private let dataProvider = DataProvider()
-	
 	// MARK: UI properties
 	
 	private lazy var addButton = {
-		let addButton = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addButtonDidTap))
-		addButton.tintColor = .black
+		let addButton = UIBarButtonItem(
+			barButtonSystemItem: .add,
+			target: self,
+			action: #selector(addButtonDidTap)
+		)
+		addButton.tintColor = .ypTextColor
 		
 		return addButton
 	}()
@@ -94,7 +100,7 @@ final class TrackersViewController: UIViewController {
 			comment: "Сообщение при пустом списке трекеров"
 		)
 		label.font = .systemFont(ofSize: 12, weight: .medium)
-		label.textColor = .black
+		label.textColor = .ypTextColor
 		label.translatesAutoresizingMaskIntoConstraints = false
 		
 		return label
@@ -125,6 +131,7 @@ final class TrackersViewController: UIViewController {
 	
 	private lazy var collectionView = {
 		let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
+		collectionView.backgroundColor = .ypBackground
 		collectionView.translatesAutoresizingMaskIntoConstraints = false
 		
 		return collectionView
@@ -136,24 +143,32 @@ final class TrackersViewController: UIViewController {
 		super.viewDidLoad()
 		initUI()
 		onTrackersUpdated()
-		dataProvider.delegate = self
-		categories = dataProvider.categories
-		completedTrackers = dataProvider.trackerRecords
+		dataProvider?.delegate = self
+		categories = dataProvider?.categories ?? []
+		completedTrackers = dataProvider?.trackerRecords ?? []
 		
 		let currentFilterIndex = UserDefaults.standard.integer(forKey: "CurrentFilterIndex")
 		self.currentFilterIndex = currentFilterIndex
 		
 		collectionView.alwaysBounceVertical = true
+		collectionView.contentInset.bottom += 50
 	}
 	
 	// MARK: UI methods
 	
 	private func initUI() {
-		view.backgroundColor = .white
+		view.backgroundColor = .ypBackground
 		
 		navigationItem.largeTitleDisplayMode = .always
 		navigationController?.navigationBar.prefersLargeTitles = true
-		navigationItem.title = NSLocalizedString("trackers", comment: "Название экрана с трекерами")
+		navigationController?.navigationBar.largeTitleTextAttributes = [
+			.foregroundColor: UIColor.ypTextColor
+		]
+		navigationItem.title = NSLocalizedString(
+			"trackers",
+			comment: "Название экрана с трекерами"
+		)
+		
 		self.navigationController?.hidesBarsOnSwipe = false
 		
 		addNavigationBarItems()
@@ -188,7 +203,7 @@ final class TrackersViewController: UIViewController {
 		view.addSubview(emptyTrackersLabel)
 		
 		NSLayoutConstraint.activate([
-			emptyTrackersLabel.topAnchor.constraint(equalTo: emptyTrackersImageView.bottomAnchor),
+			emptyTrackersLabel.topAnchor.constraint(equalTo: emptyTrackersImageView.bottomAnchor, constant: 8),
 			emptyTrackersLabel.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor)
 		])
 	}
@@ -411,15 +426,15 @@ extension TrackersViewController: TrackerViewCellDelegate {
 		let trackerRecord = TrackerRecord(trackerId: tracker.id, date: date)
 		let completedToday = isTrackerCompleted(tracker)
 		
-		dataProvider.setTrackerRecord(trackerRecord, completed: completedToday)
+		dataProvider?.setTrackerRecord(trackerRecord, completed: completedToday)
 	}
 	
 	func pinTracker(tracker: Tracker, category: TrackerCategory) {
-		try? dataProvider.pinTracker(tracker: tracker, category: category)
+		try? dataProvider?.pinTracker(tracker: tracker, category: category)
 	}
 	
 	func unpinTracker(tracker: Tracker) {
-		try? dataProvider.unpinTracker(tracker: tracker)
+		dataProvider?.unpinTracker(tracker: tracker)
 	}
 	
 	func editTracker(tracker: Tracker, category: TrackerCategory, daysCountText: String) {
@@ -468,7 +483,7 @@ extension TrackersViewController: TrackerViewCellDelegate {
 	}
 	
 	func deleteTracker(tracker: Tracker) {
-		dataProvider.deleteTracker(tracker)
+		dataProvider?.deleteTracker(tracker)
 	}
 }
 
@@ -484,15 +499,15 @@ extension TrackersViewController: UISearchResultsUpdating {
 
 extension TrackersViewController: DataProviderDelegate {
 	func didChangeCategory() {
-		categories = dataProvider.categories
+		categories = dataProvider?.categories ?? []
 	}
 	
 	func didChangeTracker() {
-		categories = dataProvider.categories
+		categories = dataProvider?.categories ?? []
 	}
 	
 	func didChangeTrackerRecord() {
-		completedTrackers = dataProvider.trackerRecords
+		completedTrackers = dataProvider?.trackerRecords ?? []
 	}
 }
 
@@ -500,12 +515,12 @@ extension TrackersViewController: DataProviderDelegate {
 
 extension TrackersViewController: CreateTrackerDelegateProtocol {
 	func trackerCreated(tracker: Tracker, in category: TrackerCategory) {
-		try? dataProvider.trackerCreated(tracker, in: category)
+		try? dataProvider?.trackerCreated(tracker, in: category)
 		self.collectionView.reloadData()
 	}
 	
 	func editTracker(tracker: Tracker, in category: TrackerCategory) {
-		try? dataProvider.editTracker(tracker, in: category)
+		try? dataProvider?.editTracker(tracker, in: category)
 	}
 }
 

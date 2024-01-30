@@ -644,7 +644,7 @@ final class CreateTrackerViewController: UIViewController {
 			.thursday,
 			.friday,
 			.saturday,
-			.sunday,
+			.sunday
 		]
 	}
 }

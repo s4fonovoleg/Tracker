@@ -64,7 +64,9 @@ final class LaunchScreen: UIViewController {
 			fatalError("Invalid Configuration")
 		}
 		
-		let navigationController = UINavigationController(rootViewController: TrackersViewController())
+		let trackersViewController = TrackersViewController()
+		trackersViewController.dataProvider = DataProvider()
+		let navigationController = UINavigationController(rootViewController: trackersViewController)
 		let statisticsController = StatisticsViewController()
 		let tabBarController = TabBarController()
 		
