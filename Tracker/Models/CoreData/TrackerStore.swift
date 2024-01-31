@@ -73,10 +73,6 @@ final class TrackerStore: NSObject {
 	
 	// MARK: Public methods
 	
-	func getTrackerCoreData() {
-		
-	}
-	
 	func addNewTracker(_ tracker: Tracker, in category: TrackerCategoryCoreData) throws {
 		let trackerCoreData = TrackerCoreData(context: context)
 		
@@ -168,6 +164,7 @@ final class TrackerStore: NSObject {
 			return
 		}
 		
+		TrackerRecordStore.standard.deleteTrackerRecords(trackerId: tracker.id)
 		context.delete(trackerCoreData)
 		saveContext()
 	}

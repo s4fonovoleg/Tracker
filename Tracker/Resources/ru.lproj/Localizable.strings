@@ -32,3 +32,8 @@
 "filters.todayTrackers" = "Трекеры на сегодня";
 "filters.completed" = "Завершенные";
 "filters.notCompleted" = "Не завершенные";
+"nothingToAnalyze" = "Анализировать пока нечего";
+"statistics.bestPeriod" = "Лучший период";
+"statistics.perfectDays" = "Идеальный дни";
+"statistics.completedTrackers" = "Трекеров завершено";
+"statistics.averageValue" = "Среднее значение";

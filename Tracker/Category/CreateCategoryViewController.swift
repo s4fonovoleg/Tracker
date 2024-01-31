@@ -108,7 +108,8 @@ final class CreateCategoryViewController: UIViewController {
 	}
 	
 	@objc private func doneButtonDidTap() {
-		guard let name = categoryNameTextField.text else {
+		guard let name = categoryNameTextField.text,
+			  !name.isEmpty else {
 			return
 		}
 		

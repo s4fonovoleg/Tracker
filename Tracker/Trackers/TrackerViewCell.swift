@@ -36,7 +36,7 @@ final class TrackerViewCell: UICollectionViewCell {
 	private lazy var countLabel = {
 		let label = UILabel()
 		label.translatesAutoresizingMaskIntoConstraints = false
-		label.textColor = .black
+		label.textColor = .ypTextColor
 		label.font = .systemFont(ofSize: 12, weight: .medium)
 		
 		return label
@@ -128,9 +128,8 @@ final class TrackerViewCell: UICollectionViewCell {
 		
 		countLabel.text = daysCountCaption
 		self.completedOnDate = completedOnDate
-		
+		pinImageView.isHidden = !isPinnedCategory()
 		updateDoneButton()
-		addPinImage()
 	}
 	
 	// MARK: Private methods
@@ -148,6 +147,7 @@ final class TrackerViewCell: UICollectionViewCell {
 		colorView.addSubview(emojiBackground)
 		colorView.addSubview(emojiLabel)
 		colorView.addSubview(textView)
+		colorView.addSubview(pinImageView)
 		colorView.addInteraction(UIContextMenuInteraction(delegate: self))
 	}
 	
@@ -178,21 +178,13 @@ final class TrackerViewCell: UICollectionViewCell {
 			doneButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
 			doneButton.topAnchor.constraint(equalTo: colorView.bottomAnchor, constant: 8),
 			doneButton.widthAnchor.constraint(equalToConstant: doneButton.frame.width),
-			doneButton.heightAnchor.constraint(equalToConstant: doneButton.frame.height)
-		])
-	}
-	
-	private func addPinImage() {
-		if isPinnedCategory() {
-			colorView.addSubview(pinImageView)
+			doneButton.heightAnchor.constraint(equalToConstant: doneButton.frame.height),
 			
-			NSLayoutConstraint.activate([
-				pinImageView.widthAnchor.constraint(equalToConstant: 24),
-				pinImageView.heightAnchor.constraint(equalToConstant: 24),
-				pinImageView.topAnchor.constraint(equalTo: colorView.topAnchor, constant: 12),
-				pinImageView.trailingAnchor.constraint(equalTo: colorView.trailingAnchor, constant: -4)
-			])
-		}
+			pinImageView.widthAnchor.constraint(equalToConstant: 24),
+			pinImageView.heightAnchor.constraint(equalToConstant: 24),
+			pinImageView.topAnchor.constraint(equalTo: colorView.topAnchor, constant: 12),
+			pinImageView.trailingAnchor.constraint(equalTo: colorView.trailingAnchor, constant: -4)
+		])
 	}
 	
 	@objc private func doneButtonDidTap() {

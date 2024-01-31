@@ -287,7 +287,7 @@ final class CreateTrackerViewController: UIViewController {
 		
 		contentView.addSubview(headerLabel)
 		
-		if let dayCountLabelCaption {
+		if dayCountLabelCaption != nil {
 			contentView.addSubview(dayCountLabel)
 		}
 		
@@ -328,7 +328,7 @@ final class CreateTrackerViewController: UIViewController {
 		setupContentViewConstraints()
 		setupHeaderConstraints()
 		
-		if let dayCountLabelCaption {
+		if dayCountLabelCaption != nil {
 			setupDayCountLabelConstraints()
 		}
 		

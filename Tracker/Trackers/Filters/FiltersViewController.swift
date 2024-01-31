@@ -69,7 +69,7 @@ final class FiltersViewController: UIViewController {
 	// MARK: Private methods
 	
 	private func setupViews() {
-		view.backgroundColor = .white
+		view.backgroundColor = .ypBackground
 		view.addSubview(headerLabel)
 		view.addSubview(tableView)
 		

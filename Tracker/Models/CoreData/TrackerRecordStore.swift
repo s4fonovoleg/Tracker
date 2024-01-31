@@ -15,6 +15,8 @@ final class TrackerRecordStore: NSObject {
 	
 	// MARK: Public Properties
 	
+	static let standard = TrackerRecordStore()
+	
 	var delegate: TrackerRecordStoreDelegate?
 	
 	var trackerRecords: [TrackerRecord] {
@@ -74,7 +76,7 @@ final class TrackerRecordStore: NSObject {
 		trackerRecordCoreData.trackerId = trackerRecord.trackerId
 		trackerRecordCoreData.date = trackerRecord.date
 		
-		try context.save()
+		saveContext()
 	}
 	
 	func deleteTrackerRecord(_ trackerRecord: TrackerRecord) {
@@ -86,6 +88,25 @@ final class TrackerRecordStore: NSObject {
 							trackerRecord.trackerId,
 				#keyPath(TrackerRecordCoreData.date),
 				trackerRecord.date
+			]
+		)
+		
+		guard let trackerRecords = try? context.fetch(request),
+			  let trackerRecordCoreData = trackerRecords.first else {
+			return
+		}
+		
+		context.delete(trackerRecordCoreData)
+		saveContext()
+	}
+	
+	func deleteTrackerRecords(trackerId: UUID) {
+		let request = NSFetchRequest<TrackerRecordCoreData>(entityName: "TrackerRecordCoreData")
+		request.predicate = NSPredicate(
+			format: "%K == %@",
+			argumentArray: [
+				#keyPath(TrackerRecordCoreData.trackerId),
+				trackerId
 			]
 		)
 		
@@ -107,6 +128,16 @@ final class TrackerRecordStore: NSObject {
 		return TrackerRecord(
 			trackerId: trackerId,
 			date: date)
+	}
+	
+	private func saveContext() {
+		do {
+			try context.save()
+		}
+		catch {
+			let nserror = error as NSError
+			print("Unresolved error \(nserror), \(nserror.userInfo)")
+		}
 	}
 }
 

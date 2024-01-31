@@ -8,6 +8,8 @@ final class TrackersViewController: UIViewController {
 	
 	// MARK: Private properties
 	
+	private let analyticsService = AnalyticsService()
+	
 	private var currentFilterIndex = 0 {
 		didSet {
 			if currentFilterIndex == 1 {
@@ -154,6 +156,30 @@ final class TrackersViewController: UIViewController {
 		collectionView.contentInset.bottom += 50
 	}
 	
+	override func viewDidAppear(_ animated: Bool) {
+		super.viewDidAppear(animated)
+		
+		analyticsService.reportEvent(
+			eventName: "open",
+			parameters: [
+				"event": "open",
+				"screen": "Main"
+			]
+		)
+	}
+	
+	override func viewWillDisappear(_ animated: Bool) {
+		super.viewWillDisappear(animated)
+		
+		analyticsService.reportEvent(
+			eventName: "close",
+			parameters: [
+				"event": "close",
+				"screen": "Main"
+			]
+		)
+	}
+	
 	// MARK: UI methods
 	
 	private func initUI() {
@@ -169,7 +195,7 @@ final class TrackersViewController: UIViewController {
 			comment: "Название экрана с трекерами"
 		)
 		
-		self.navigationController?.hidesBarsOnSwipe = false
+		navigationController?.hidesBarsOnSwipe = false
 		
 		addNavigationBarItems()
 		addCollectionView()
@@ -243,6 +269,15 @@ final class TrackersViewController: UIViewController {
 	}
 	
 	@objc private func addButtonDidTap() {
+		analyticsService.reportEvent(
+			eventName: "click",
+			parameters: [
+				"event": "click",
+				"screen": "Main",
+				"item": "add_track"
+			]
+		)
+		
 		let controller = ChooseTrackerTypeViewController()
 		controller.modalPresentationStyle = .pageSheet
 		controller.delegate = self
@@ -315,6 +350,15 @@ final class TrackersViewController: UIViewController {
 	}
 	
 	@objc func filtersButtonDidTap() {
+		analyticsService.reportEvent(
+			eventName: "click",
+			parameters: [
+				"event": "click",
+				"screen": "Main",
+				"item": "filter"
+			]
+		)
+		
 		let controller = FiltersViewController()
 		controller.selectedFilterIndex = currentFilterIndex
 		controller.delegate = self
@@ -375,6 +419,7 @@ extension TrackersViewController: UICollectionViewDataSource {
 		category.name
 		
 		supplementaryView.titleLabel.text = categoryTitle
+		supplementaryView.titleLabel.textColor = .ypTextColor
 		
 		return supplementaryView
 	}
@@ -417,6 +462,15 @@ extension TrackersViewController: UICollectionViewDelegateFlowLayout {
 
 extension TrackersViewController: TrackerViewCellDelegate {
 	func doneButtonDidTap(_ cell: TrackerViewCell) {
+		analyticsService.reportEvent(
+			eventName: "click",
+			parameters: [
+				"event": "click",
+				"screen": "Main",
+				"item": "track"
+			]
+		)
+		
 		guard let tracker = cell.tracker,
 			  let date = datePicker.date.removeTime,
 			  date <= Date() else {
@@ -438,6 +492,15 @@ extension TrackersViewController: TrackerViewCellDelegate {
 	}
 	
 	func editTracker(tracker: Tracker, category: TrackerCategory, daysCountText: String) {
+		analyticsService.reportEvent(
+			eventName: "click",
+			parameters: [
+				"event": "click",
+				"screen": "Main",
+				"item": "edit"
+			]
+		)
+		
 		let controller = CreateTrackerViewController()
 		controller.modalPresentationStyle = .pageSheet
 		controller.delegate = self
@@ -449,6 +512,15 @@ extension TrackersViewController: TrackerViewCellDelegate {
 	}
 	
 	func deleteTrackerConfirmation(tracker: Tracker) {
+		analyticsService.reportEvent(
+			eventName: "click",
+			parameters: [
+				"event": "click",
+				"screen": "Main",
+				"item": "delete"
+			]
+		)
+		
 		let deleteConfirmationMessage = NSLocalizedString(
 			"deleteConfirmation",
 			comment: "Текст подтверджения удаления трекера"

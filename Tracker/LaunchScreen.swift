@@ -1,6 +1,11 @@
 import UIKit
 
 final class LaunchScreen: UIViewController {
+	
+	// MARK: Private properties
+	
+	
+	
 	// MARK: Private UI properties
 	
 	private var logoView: UIImageView = {
