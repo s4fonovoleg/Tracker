@@ -2,12 +2,15 @@ import UIKit
 
 protocol CreateTrackerDelegateProtocol {
 	func trackerCreated(tracker: Tracker, in category: TrackerCategory)
+	func editTracker(tracker: Tracker, in category: TrackerCategory)
 }
 
 final class CreateTrackerViewController: UIViewController {
 	
 	// MARK: Public properties
 	
+	var existingTracker: Tracker?
+	var dayCountLabelCaption: String?
 	var isHabit = true
 	var delegate: CreateTrackerDelegateProtocol?
 	
@@ -28,7 +31,7 @@ final class CreateTrackerViewController: UIViewController {
 		.trackerColor17, .trackerColor18,
 	]
 	
-	private var category: TrackerCategory? {
+	var category: TrackerCategory? {
 		didSet {
 			updateCategoryButtonTitle()
 		}
@@ -59,11 +62,39 @@ final class CreateTrackerViewController: UIViewController {
 	}()
 	
 	private lazy var headerLabel = {
+		var caption = NSLocalizedString(
+			"editingTracker",
+			comment: "Заголовок экрана редактирования трекера"
+		)
+		
+		if existingTracker == nil {
+			caption = isHabit ?
+			NSLocalizedString(
+				"newHabit",
+				comment: "Заголовок экрана создания привычки"
+			) :
+			NSLocalizedString(
+				"newIrregularEvent",
+				comment: "Заголовок экрана создания нерегулярного события"
+			)
+		}
+		
 		let label = UILabel()
 		label.textAlignment = .center
-		label.text = "Новая привычка"
+		label.text = caption
 		label.textColor = .black
 		label.font = .systemFont(ofSize: 16, weight: .medium)
+		label.translatesAutoresizingMaskIntoConstraints = false
+		
+		return label
+	}()
+	
+	private lazy var dayCountLabel = {
+		let label = UILabel()
+		label.textAlignment = .center
+		label.text = dayCountLabelCaption ?? ""
+		label.textColor = .black
+		label.font = .systemFont(ofSize: 32, weight: .bold)
 		label.translatesAutoresizingMaskIntoConstraints = false
 		
 		return label
@@ -73,7 +104,10 @@ final class CreateTrackerViewController: UIViewController {
 		let textField = UITextFieldWithPadding()
 		
 		textField.translatesAutoresizingMaskIntoConstraints = false
-		textField.placeholder = "Введите название трекера"
+		textField.placeholder = NSLocalizedString(
+			"enterTrackerName",
+			comment: "Placeholder поля с именем трекера"
+		)
 		textField.layer.cornerRadius = 16
 		textField.backgroundColor = .lightGreyBackground
 		textField.leftInset = 16
@@ -103,7 +137,10 @@ final class CreateTrackerViewController: UIViewController {
 	private lazy var categoryButtonTitle = {
 		let label = UILabel()
 		label.translatesAutoresizingMaskIntoConstraints = false
-		label.text = "Категория"
+		label.text = NSLocalizedString(
+			"category",
+			comment: "Заголовок экрана категорий"
+		)
 		label.textColor = .black
 		label.font = .systemFont(ofSize: 16, weight: .light)
 		
@@ -142,7 +179,10 @@ final class CreateTrackerViewController: UIViewController {
 	private lazy var scheduleButtonTitle = {
 		let label = UILabel()
 		label.translatesAutoresizingMaskIntoConstraints = false
-		label.text = "Расписание"
+		label.text = NSLocalizedString(
+			"schedule",
+			comment: "Заголовок кнопки перехода на экран расписания"
+		)
 		label.textColor = .black
 		label.font = .systemFont(ofSize: 16, weight: .light)
 		
@@ -187,14 +227,27 @@ final class CreateTrackerViewController: UIViewController {
 		return button
 	}()
 	
-	private lazy var createButton = {
+	private lazy var doneButton = {
+		let caption = existingTracker == nil ?
+		NSLocalizedString(
+			"create",
+			comment: "Заголовок кнопки создания трекера"
+		) :
+		NSLocalizedString(
+			"save",
+			comment: "Заголовок кнопки сохранения отредактированного трекера"
+		)
 		let button = UIButton()
 		button.translatesAutoresizingMaskIntoConstraints = false
 		button.backgroundColor = .ypBlack
-		button.setTitle("Создать", for: .normal)
+		button.setTitle(caption, for: .normal)
 		button.setTitleColor(.white, for: .normal)
 		button.layer.cornerRadius = 16
-		button.addTarget(self, action: #selector(createButtonDidTap), for: .touchUpInside)
+		button.addTarget(
+			self,
+			action: #selector(createButtonDidTap),
+			for: .touchUpInside
+		)
 		
 		return button
 	}()
@@ -221,10 +274,11 @@ final class CreateTrackerViewController: UIViewController {
 		
 		setupViews()
 		setupConstraints()
-		cancelButton.addTarget(self, action: #selector(cancelButtonDidTap), for: .touchUpInside)
+		initExistingTracker()
+		updateCategoryButtonTitle()
 	}
 	
-	// MARK: UI Methods
+	// MARK: Private UI Methods
 	
 	private func setupViews() {
 		view.addSubview(scrollView)
@@ -232,6 +286,11 @@ final class CreateTrackerViewController: UIViewController {
 		scrollView.addSubview(contentView)
 		
 		contentView.addSubview(headerLabel)
+		
+		if dayCountLabelCaption != nil {
+			contentView.addSubview(dayCountLabel)
+		}
+		
 		contentView.addSubview(trackerNameTextField)
 		contentView.addSubview(categoryButton)
 		contentView.insertSubview(categoryAccessoryImageView, belowSubview: categoryButton)
@@ -249,14 +308,14 @@ final class CreateTrackerViewController: UIViewController {
 		contentView.addSubview(emojiCollectionView)
 		contentView.addSubview(colorCollectionView)
 		contentView.addSubview(cancelButton)
-		contentView.addSubview(createButton)
+		contentView.addSubview(doneButton)
 		
 		emojiCollectionView.dataSource = self
 		emojiCollectionView.delegate = self
 		
 		colorCollectionView.dataSource = self
 		colorCollectionView.delegate = self
-
+		
 		emojiCollectionView.register(EmojiViewCell.self, forCellWithReuseIdentifier: emojiCellReuseIdentifier)
 		colorCollectionView.register(ColorViewCell.self, forCellWithReuseIdentifier: colorCellReuseIdentifier)
 		
@@ -268,6 +327,11 @@ final class CreateTrackerViewController: UIViewController {
 		setupScrollViewConstraints()
 		setupContentViewConstraints()
 		setupHeaderConstraints()
+		
+		if dayCountLabelCaption != nil {
+			setupDayCountLabelConstraints()
+		}
+		
 		setupTextFieldConstraints()
 		setupCategoryButtonConstraints()
 		
@@ -312,10 +376,19 @@ final class CreateTrackerViewController: UIViewController {
 		])
 	}
 	
+	private func setupDayCountLabelConstraints() {
+		NSLayoutConstraint.activate([
+			dayCountLabel.centerXAnchor.constraint(equalTo: scrollView.centerXAnchor),
+			dayCountLabel.topAnchor.constraint(equalTo: headerLabel.bottomAnchor, constant: 38)
+		])
+	}
+	
 	private func setupTextFieldConstraints() {
+		let topView = dayCountLabelCaption == nil ? headerLabel : dayCountLabel
+		
 		NSLayoutConstraint.activate([
 			trackerNameTextField.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
-			trackerNameTextField.topAnchor.constraint(equalTo: headerLabel.bottomAnchor, constant: 38),
+			trackerNameTextField.topAnchor.constraint(equalTo: topView.bottomAnchor, constant: 38),
 			trackerNameTextField.heightAnchor.constraint(equalToConstant: 75),
 			trackerNameTextField.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
 			trackerNameTextField.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16)
@@ -415,11 +488,11 @@ final class CreateTrackerViewController: UIViewController {
 		let buttonWidth = (view.frame.width - 48) / 2
 		
 		NSLayoutConstraint.activate([
-			createButton.heightAnchor.constraint(equalToConstant: 60),
-			createButton.topAnchor.constraint(equalTo: colorCollectionView.bottomAnchor),
-			createButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
-			createButton.widthAnchor.constraint(equalToConstant: buttonWidth),
-			createButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+			doneButton.heightAnchor.constraint(equalToConstant: 60),
+			doneButton.topAnchor.constraint(equalTo: colorCollectionView.bottomAnchor),
+			doneButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -20),
+			doneButton.widthAnchor.constraint(equalToConstant: buttonWidth),
+			doneButton.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
 		])
 	}
 	
@@ -432,6 +505,10 @@ final class CreateTrackerViewController: UIViewController {
 	}
 	
 	private func updateCategoryButtonTitle() {
+		if categoryButtonTitleVerticalConstraint == nil {
+			return
+		}
+		
 		categoryButtonTitleVerticalConstraint?.isActive = false
 		
 		if (category != nil) {
@@ -461,6 +538,43 @@ final class CreateTrackerViewController: UIViewController {
 	
 	// MARK: Private methods
 	
+	private func initExistingTracker() {
+		guard let existingTracker,
+			  let emojiIndex = emojies.firstIndex(of: existingTracker.emoji),
+			  let colorIndex = colors.firstIndex(where: { color in
+				  isColorEqual(color, to: existingTracker.color)
+			  })
+		else {
+			return
+		}
+		
+		trackerNameTextField.text = existingTracker.name
+		lastSelectedEmojiIndexPath = IndexPath(row: emojiIndex, section: 0)
+		lastSelectedColorIndexPath = IndexPath(row: colorIndex, section: 0)
+		weekDays = existingTracker.weekDays
+	}
+	
+	private func isColorEqual(_ color: UIColor, to: UIColor) -> Bool {
+		guard let colorComponents = color.cgColor.components,
+			  let toComponents = to.cgColor.components
+		else {
+			return false
+		}
+		
+		return isEqual(colorComponents[0], to: toComponents[0]) &&
+			   isEqual(colorComponents[1], to: toComponents[1]) &&
+			   isEqual(colorComponents[2], to: toComponents[2]) &&
+			   isEqual(colorComponents[3], to: toComponents[3])
+	}
+	
+	private func isEqual(
+		_ number: CGFloat,
+		to: CGFloat,
+		with precision: CGFloat = 0.001
+	) -> Bool {
+		abs(number - to) <= precision
+	}
+	
 	private func getWeekDaysShortNames() -> String {
 		weekDays.map { item in
 			weekDayShortName[item] ?? ""
@@ -480,15 +594,21 @@ final class CreateTrackerViewController: UIViewController {
 		
 		let emoji = emojies[emojiIndex]
 		let color = colors[colorIndex]
-		
-		delegate?.trackerCreated(tracker: Tracker(
-			id: UUID(),
+		let tracker = Tracker(
+			id: existingTracker?.id ?? UUID(),
 			name: trackerNameTextField.text ?? "",
 			color: color,
 			emoji: emoji,
-			weekDays: getWeekDays()),
-			in: category
+			weekDays: getWeekDays(),
+			cachedCategory: nil
 		)
+		
+		if existingTracker == nil {
+			delegate?.trackerCreated(tracker: tracker, in: category)
+		} else {
+			delegate?.editTracker(tracker: tracker, in: category)
+		}
+		
 		dismiss(animated: true)
 	}
 	
@@ -502,9 +622,12 @@ final class CreateTrackerViewController: UIViewController {
 	}
 	
 	@objc private func openCategoryView() {
+		let category = existingTracker?.cachedCategory ?? category
+		let viewModel = CategoriesViewModel(selectedCategory: category)
 		let controller = CategoryViewController()
-		controller.modalPresentationStyle = .pageSheet
 		controller.delegate = self
+		controller.viewModel = viewModel
+		controller.modalPresentationStyle = .pageSheet
 		
 		present(controller, animated: true)
 	}
@@ -521,7 +644,7 @@ final class CreateTrackerViewController: UIViewController {
 			.thursday,
 			.friday,
 			.saturday,
-			.sunday,
+			.sunday
 		]
 	}
 }
@@ -577,7 +700,9 @@ extension CreateTrackerViewController: UICollectionViewDataSource {
 			return EmojiSupplementaryView()
 		}
 		
-		let headerCaption = collectionView == emojiCollectionView ? "Emoji" : "Цвет"
+		let headerCaption = collectionView == emojiCollectionView ?
+			NSLocalizedString("emoji", comment: "Заголовок коллекции emoji") :
+			NSLocalizedString("color", comment: "Заголовок коллекции цветов")
 		supplementaryView.titleLabel.text = headerCaption
 		return supplementaryView
 	}
@@ -593,7 +718,7 @@ extension CreateTrackerViewController: UICollectionViewDelegate {
 	func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
 		if collectionView == emojiCollectionView {
 			let indexesToReload = [indexPath, lastSelectedEmojiIndexPath].compactMap({ $0 })
-		
+			
 			if lastSelectedEmojiIndexPath == indexPath {
 				lastSelectedEmojiIndexPath = nil
 			} else {
@@ -628,18 +753,21 @@ extension CreateTrackerViewController: UICollectionViewDelegateFlowLayout {
 		_ collectionView: UICollectionView,
 		layout collectionViewLayout: UICollectionViewLayout,
 		sizeForItemAt indexPath: IndexPath) -> CGSize {
-		CGSize(width: 52, height: 52)
-	}
+			CGSize(width: 52, height: 52)
+		}
 	
 	func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
 		let indexPath = IndexPath(row: 0, section: section)
 		let headerView = self.collectionView(collectionView, viewForSupplementaryElementOfKind: UICollectionView.elementKindSectionHeader, at: indexPath)
 		
-		return headerView.systemLayoutSizeFitting(CGSize(
-			width: collectionView.frame.width,
-			height: UIView.layoutFittingExpandedSize.height),
+		return headerView.systemLayoutSizeFitting(
+			CGSize(
+				width: collectionView.frame.width,
+				height: UIView.layoutFittingExpandedSize.height
+			),
 			withHorizontalFittingPriority: .required,
-			verticalFittingPriority: .fittingSizeLevel)
+			verticalFittingPriority: .fittingSizeLevel
+		)
 	}
 }
 

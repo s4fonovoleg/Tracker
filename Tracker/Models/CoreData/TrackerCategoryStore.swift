@@ -15,6 +15,8 @@ final class TrackerCategoryStore: NSObject {
 	
 	// MARK: Public Properties
 	
+	static let standard = TrackerCategoryStore()
+	
 	var categories: [TrackerCategory] {
 		guard let objects = self.fetchedResultsController.fetchedObjects else {
 			return []
@@ -40,7 +42,10 @@ final class TrackerCategoryStore: NSObject {
 		let request = NSFetchRequest<TrackerCategoryCoreData>(entityName: "TrackerCategoryCoreData")
 		
 		request.sortDescriptors = [
-			NSSortDescriptor(key: #keyPath(TrackerCategoryCoreData.name), ascending: true)
+			NSSortDescriptor(
+				key: #keyPath(TrackerCategoryCoreData.position),
+				ascending: true
+			)
 		]
 		request.includesSubentities = true
 		
@@ -86,51 +91,42 @@ final class TrackerCategoryStore: NSObject {
 		})
 	}
 	
-	// MARK: Private methods
-	
-	private func trackerCategory(from trackerCategoryCoreData: TrackerCategoryCoreData) throws -> TrackerCategory {
-		guard let name = trackerCategoryCoreData.name else {
+	func trackerCategory(
+		from trackerCategoryCoreData: TrackerCategoryCoreData,
+		withTrackers: Bool = true
+	) throws -> TrackerCategory {
+		guard let name = trackerCategoryCoreData.name,
+			  let id = trackerCategoryCoreData.id else {
 			throw TrackerCategoryStoreError.decodingError
 		}
 		
+		let position = Int(trackerCategoryCoreData.position)
 		let trackersCoreData = trackerCategoryCoreData.trackers?.allObjects as? [TrackerCoreData]
 		var trackers: [Tracker] = []
 		
-		if let trackersCoreData {
+		if withTrackers,
+		   let trackersCoreData {
 			trackers = try trackersCoreData.map { item in
-				try tracker(from: item)
+				try TrackerStore.standard.tracker(from: item)
 			}
 		}
 		
 		return TrackerCategory(
-			name: name,
-			trackers: trackers)
-	}
-	
-	private func tracker(from trackerCoreData: TrackerCoreData) throws -> Tracker {
-		guard let id = trackerCoreData.id,
-			  let name = trackerCoreData.name,
-			  let color = trackerCoreData.color,
-			  let emoji = trackerCoreData.emoji,
-			  let weekDayNumbers = trackerCoreData.weekDays as? [Int]
-		else {
-			throw TrackerStoreError.decodingError
-		}
-		
-		let weekDays = try weekDayMarshalling.weekDays(from: weekDayNumbers)
-		
-		return Tracker(
 			id: id,
 			name: name,
-			color: uiColorMarshaling.color(from: color),
-			emoji: emoji,
-			weekDays: weekDays)
+			position: position,
+			trackers: trackers
+		)
 	}
+	
+	// MARK: Private methods
 	
 	private func addNewTrackerCategory(_ category: TrackerCategory) throws -> TrackerCategoryCoreData {
 		let categoryCoreData = TrackerCategoryCoreData(context: context)
 		
+		categoryCoreData.id = category.id
 		categoryCoreData.name = category.name
+		categoryCoreData.position = Int64(category.position)
 		
 		try context.save()
 		

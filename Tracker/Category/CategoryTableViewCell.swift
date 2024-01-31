@@ -29,7 +29,7 @@ final class CategoryTableViewCell: UITableViewCell {
 	}()
 	
 	private let checkmark = {
-		let checkmark = UIImage(systemName: "checkmark")
+		let checkmark = UIImage(named: "Checkmark")
 		let imageView = UIImageView(image: checkmark)
 		
 		imageView.translatesAutoresizingMaskIntoConstraints = false

@@ -2,6 +2,10 @@ import UIKit
 
 protocol TrackerViewCellDelegate: AnyObject {
 	func doneButtonDidTap(_ cell: TrackerViewCell)
+	func pinTracker(tracker: Tracker, category: TrackerCategory)
+	func unpinTracker(tracker: Tracker)
+	func editTracker(tracker: Tracker, category: TrackerCategory, daysCountText: String)
+	func deleteTrackerConfirmation(tracker: Tracker)
 }
 
 final class TrackerViewCell: UICollectionViewCell {
@@ -11,6 +15,7 @@ final class TrackerViewCell: UICollectionViewCell {
 	weak var delegate: TrackerViewCellDelegate?
 	
 	var tracker: Tracker?
+	var category: TrackerCategory?
 	
 	var completedOnDate: Bool = false {
 		didSet {
@@ -20,11 +25,18 @@ final class TrackerViewCell: UICollectionViewCell {
 	
 	// MARK: Private UI properties
 	
+	private lazy var pinImageView = {
+		let image = UIImage(named: "Pin")
+		let imageView = UIImageView(image: image)
+		imageView.translatesAutoresizingMaskIntoConstraints = false
+		
+		return imageView
+	}()
+	
 	private lazy var countLabel = {
 		let label = UILabel()
 		label.translatesAutoresizingMaskIntoConstraints = false
-		label.text = "0 дней"
-		label.textColor = .black
+		label.textColor = .ypTextColor
 		label.font = .systemFont(ofSize: 12, weight: .medium)
 		
 		return label
@@ -37,7 +49,7 @@ final class TrackerViewCell: UICollectionViewCell {
 		
 		return view
 	}()
-
+	
 	private lazy var emojiLabel = {
 		let label = UILabel()
 		label.translatesAutoresizingMaskIntoConstraints = false
@@ -91,8 +103,13 @@ final class TrackerViewCell: UICollectionViewCell {
 	
 	// MARK: Public methods
 	
-	func configure(tracker: Tracker, completedOnDate: Bool, counter: Int) {
+	func configure(
+		category: TrackerCategory,
+		tracker: Tracker,
+		completedOnDate: Bool, counter: Int
+	) {
 		self.tracker = tracker
+		self.category = category
 		self.completedOnDate = completedOnDate
 		
 		textView.text = tracker.name
@@ -101,15 +118,17 @@ final class TrackerViewCell: UICollectionViewCell {
 		emojiLabel.text = tracker.emoji
 		doneButton.backgroundColor = tracker.color
 		
-		let daysCaption = getNumberEnding(
-			for: counter,
-			"дней",
-			"день",
-			"дня")
+		let daysCountCaption = String.localizedStringWithFormat(
+			NSLocalizedString(
+				"numberOfDays",
+				comment: "Number of completed trackers in days"
+			),
+			counter
+		)
 		
-		countLabel.text = "\(counter) \(daysCaption)"
+		countLabel.text = daysCountCaption
 		self.completedOnDate = completedOnDate
-		
+		pinImageView.isHidden = !isPinnedCategory()
 		updateDoneButton()
 	}
 	
@@ -128,6 +147,8 @@ final class TrackerViewCell: UICollectionViewCell {
 		colorView.addSubview(emojiBackground)
 		colorView.addSubview(emojiLabel)
 		colorView.addSubview(textView)
+		colorView.addSubview(pinImageView)
+		colorView.addInteraction(UIContextMenuInteraction(delegate: self))
 	}
 	
 	private func setupConstraints() {
@@ -157,7 +178,12 @@ final class TrackerViewCell: UICollectionViewCell {
 			doneButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -12),
 			doneButton.topAnchor.constraint(equalTo: colorView.bottomAnchor, constant: 8),
 			doneButton.widthAnchor.constraint(equalToConstant: doneButton.frame.width),
-			doneButton.heightAnchor.constraint(equalToConstant: doneButton.frame.height)
+			doneButton.heightAnchor.constraint(equalToConstant: doneButton.frame.height),
+			
+			pinImageView.widthAnchor.constraint(equalToConstant: 24),
+			pinImageView.heightAnchor.constraint(equalToConstant: 24),
+			pinImageView.topAnchor.constraint(equalTo: colorView.topAnchor, constant: 12),
+			pinImageView.trailingAnchor.constraint(equalTo: colorView.trailingAnchor, constant: -4)
 		])
 	}
 	
@@ -165,10 +191,14 @@ final class TrackerViewCell: UICollectionViewCell {
 		delegate?.doneButtonDidTap(self)
 	}
 	
+	private func isPinnedCategory() -> Bool {
+		category?.id == pinnedCategoryId
+	}
+	
 	private func getNumberEnding(for num: Int, _ firstForm: String, _ secondForm: String, _ thirdFrom: String) -> String {
 		let lastNumber = num % 10
 		
-		if lastNumber == 0 || lastNumber > 4 {
+		if num > 10 && num < 20 || lastNumber == 0 || lastNumber > 4 {
 			return firstForm
 		}
 		
@@ -177,5 +207,69 @@ final class TrackerViewCell: UICollectionViewCell {
 		}
 		
 		return thirdFrom
+	}
+}
+
+// MARK: UIContextMenuInteractionDelegate
+
+extension TrackerViewCell: UIContextMenuInteractionDelegate {
+	func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+		guard let tracker,
+			  let category else {
+			return nil
+		}
+		let pinCaption = NSLocalizedString(
+			"pin",
+			comment: "Пункт меню закрепления трекера"
+		)
+		let unpinCaption = NSLocalizedString(
+			"unpin",
+			comment: "Пункт меню открепления трекера"
+		)
+		let editCaption = NSLocalizedString(
+			"edit",
+			comment: "Пункт меню редактирования трекера"
+		)
+		let deleteCaption = NSLocalizedString(
+			"delete",
+			comment: "Пункт меню удаления трекера"
+		)
+		
+		return UIContextMenuConfiguration(actionProvider: { [weak self] actions in
+			guard let self else {
+				return UIMenu()
+			}
+			
+			return UIMenu(children: [
+				UIAction(
+					title: self.isPinnedCategory() ? unpinCaption : pinCaption,
+					handler: {  _ in
+						self.isPinnedCategory() ?
+						self.delegate?.unpinTracker(
+							tracker: tracker
+						) :
+						self.delegate?.pinTracker(
+							tracker: tracker,
+							category: category
+						)
+						
+					}),
+				UIAction(
+					title: editCaption,
+					handler: { _ in
+						self.delegate?.editTracker(
+							tracker: tracker,
+							category: tracker.cachedCategory ?? category,
+							daysCountText: self.countLabel.text ?? ""
+						)
+					}),
+				UIAction(
+					title: deleteCaption,
+					attributes: [.destructive],
+					handler: { _ in
+						self.delegate?.deleteTrackerConfirmation(tracker: tracker)
+					})
+			])
+		})
 	}
 }

@@ -14,7 +14,7 @@ final class CreateCategoryViewController: UIViewController {
 	
 	private lazy var headerLabel = {
 		let label = UILabel()
-		label.text = "Категория"
+		label.text = NSLocalizedString("category", comment: "Заголовок экрана категорий")
 		label.textColor = .black
 		label.font = .systemFont(ofSize: 16, weight: .medium)
 		label.translatesAutoresizingMaskIntoConstraints = false
@@ -26,7 +26,10 @@ final class CreateCategoryViewController: UIViewController {
 		let textField = UITextFieldWithPadding()
 		
 		textField.translatesAutoresizingMaskIntoConstraints = false
-		textField.placeholder = "Введите название категории"
+		textField.placeholder = NSLocalizedString(
+			"enterCategoryName",
+			comment: "Placeholder поля с именем категории"
+		)
 		textField.layer.cornerRadius = 16
 		textField.backgroundColor = .lightGreyBackground
 		textField.leftInset = 16
@@ -39,7 +42,13 @@ final class CreateCategoryViewController: UIViewController {
 		let button = UIButton()
 		button.translatesAutoresizingMaskIntoConstraints = false
 		button.backgroundColor = .ypBlack
-		button.setTitle("Готово", for: .normal)
+		button.setTitle(
+			NSLocalizedString(
+				"doneButtonCaption",
+				comment: "Заголовок кнопки 'Готово'"
+			),
+			for: .normal
+		)
 		button.setTitleColor(.white, for: .normal)
 		button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
 		button.layer.cornerRadius = 16
@@ -99,7 +108,8 @@ final class CreateCategoryViewController: UIViewController {
 	}
 	
 	@objc private func doneButtonDidTap() {
-		guard let name = categoryNameTextField.text else {
+		guard let name = categoryNameTextField.text,
+			  !name.isEmpty else {
 			return
 		}
 		

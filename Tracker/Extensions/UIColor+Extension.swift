@@ -8,6 +8,12 @@ extension UIColor {
 	static var ypRed: UIColor { UIColor(named: "ypRed") ?? .red }
 	static var ypLightGrey: UIColor { UIColor(named: "ypLightGrey") ?? .lightGray }
 	static var ypLightGreyText: UIColor { UIColor(named: "ypLightGreyText") ?? .lightGray }
+	static var ypTextColor: UIColor { UIColor(named: "ypTextColor") ?? .black }
+	static var ypBackground: UIColor { UIColor(named: "ypBackground") ?? .systemBackground }
+	
+	static var blueGradient: UIColor { UIColor(named: "BlueGradient") ?? .blue }
+	static var greenGradient: UIColor { UIColor(named: "GreenGradient") ?? .green }
+	static var redGradient: UIColor { UIColor(named: "RedGradient") ?? .red }
 	
 	static var trackerColor1: UIColor { UIColor(named: "TrackerColor 1") ?? .black }
 	static var trackerColor2: UIColor { UIColor(named: "TrackerColor 2") ?? .black }

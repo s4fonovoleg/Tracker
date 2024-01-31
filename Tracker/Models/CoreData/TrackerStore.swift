@@ -15,6 +15,7 @@ final class TrackerStore: NSObject {
 	
 	// MARK: Public properties
 	
+	static let standard = TrackerStore()
 	var insertedIndexes: [IndexPath]?
 	var delegate: TrackerStoreDelegate?
 	var trackers: [Tracker] {
@@ -46,7 +47,8 @@ final class TrackerStore: NSObject {
 			fetchRequest: request,
 			managedObjectContext: context,
 			sectionNameKeyPath: nil,
-			cacheName: nil)
+			cacheName: nil
+		)
 		
 		try? fetchedResultsController.performFetch()
 		
@@ -73,22 +75,38 @@ final class TrackerStore: NSObject {
 	
 	func addNewTracker(_ tracker: Tracker, in category: TrackerCategoryCoreData) throws {
 		let trackerCoreData = TrackerCoreData(context: context)
-		let weekDayNumbers = weekDayMarshalling.weekDayNumbers(from: tracker.weekDays)
 		
-		trackerCoreData.name = tracker.name
-		trackerCoreData.color = uiColorMarshaling.hexString(from: tracker.color)
-		trackerCoreData.emoji = tracker.emoji
-		trackerCoreData.id = tracker.id
-		trackerCoreData.weekDays = weekDayNumbers as NSObject
+		trackerToCoreData(tracker: tracker, trackerCoreData: trackerCoreData)
 		trackerCoreData.category = category
+		saveContext()
+	}
+	
+	func pinTracker(
+		tracker: Tracker,
+		pinnedCategory: TrackerCategoryCoreData,
+		oldCategory: TrackerCategoryCoreData
+	) {
+		guard let trackerCoreData = fetchedResultsController.fetchedObjects?.first(
+			where: { trackerCoreData in
+				trackerCoreData.id == tracker.id
+			}
+		) else {
+			return
+		}
 		
-		do {
-			try context.save()
+		trackerCoreData.cachedCategory = oldCategory
+		trackerCoreData.category = pinnedCategory
+		saveContext()
+	}
+	
+	func unpinTracker(tracker: Tracker) {
+		guard let trackerCoreData = trackerCoreData(with: tracker.id) else {
+			return
 		}
-		catch {
-			let nserror = error as NSError
-			print("Unresolved error \(nserror), \(nserror.userInfo)")
-		}
+		
+		trackerCoreData.category = trackerCoreData.cachedCategory
+		trackerCoreData.cachedCategory = nil
+		saveContext()
 	}
 	
 	func tracker(from trackerCoreData: TrackerCoreData) throws -> Tracker {
@@ -102,13 +120,87 @@ final class TrackerStore: NSObject {
 		}
 		
 		let weekDays = try weekDayMarshalling.weekDays(from: weekDayNumbers)
+		var cachedCategory: TrackerCategory? = nil
+		
+		if let cachedCategoryCoreData = trackerCoreData.cachedCategory {
+			cachedCategory = try? TrackerCategoryStore.standard.trackerCategory(
+				from: cachedCategoryCoreData,
+				withTrackers: false
+			)
+		}
 		
 		return Tracker(
 			id: id,
 			name: name,
 			color: uiColorMarshaling.color(from: color),
 			emoji: emoji,
-			weekDays: weekDays)
+			weekDays: weekDays,
+			cachedCategory: cachedCategory
+		)
+	}
+	
+	func editTracker(_ tracker: Tracker, category: TrackerCategoryCoreData) {
+		guard let trackerCoreData = trackerCoreData(with: tracker.id) else {
+			return
+		}
+		
+		trackerToCoreData(tracker: tracker, trackerCoreData: trackerCoreData)
+		
+		let tracker2 = trackers.first(where: { item in
+			tracker.id == item.id
+		})
+		
+		if tracker2?.cachedCategory != nil {
+			trackerCoreData.cachedCategory = category
+		} else {
+			trackerCoreData.category = category
+		}
+		
+		saveContext()
+	}
+	
+	func deleteTracker(_ tracker: Tracker) {
+		guard let trackerCoreData = trackerCoreData(with: tracker.id) else {
+			return
+		}
+		
+		TrackerRecordStore.standard.deleteTrackerRecords(trackerId: tracker.id)
+		context.delete(trackerCoreData)
+		saveContext()
+	}
+	
+	// MARK: Private methods
+	
+	private func trackerCoreData(with id: UUID) -> TrackerCoreData? {
+		guard let trackerCoreData = fetchedResultsController.fetchedObjects?.first(
+			where: { trackerCoreData in
+				trackerCoreData.id == id
+			}
+		) else {
+			return nil
+		}
+		
+		return trackerCoreData
+	}
+	
+	private func trackerToCoreData(tracker: Tracker, trackerCoreData: TrackerCoreData) {
+		let weekDayNumbers = weekDayMarshalling.weekDayNumbers(from: tracker.weekDays)
+		
+		trackerCoreData.name = tracker.name
+		trackerCoreData.color = uiColorMarshaling.hexString(from: tracker.color)
+		trackerCoreData.emoji = tracker.emoji
+		trackerCoreData.id = tracker.id
+		trackerCoreData.weekDays = weekDayNumbers as NSObject
+	}
+	
+	private func saveContext() {
+		do {
+			try context.save()
+		}
+		catch {
+			let nserror = error as NSError
+			print("Unresolved error \(nserror), \(nserror.userInfo)")
+		}
 	}
 }
 

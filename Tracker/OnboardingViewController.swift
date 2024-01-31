@@ -107,17 +107,19 @@ final class OnboardingViewController: UIPageViewController {
 		
 		UserDefaults.standard.set(true, forKey: "SkipOnboarding")
 		
-		let navigationController = UINavigationController(rootViewController: TrackersViewController())
+		let trackersViewController = TrackersViewController()
+		trackersViewController.dataProvider = DataProvider()
+		let navigationController = UINavigationController(rootViewController: trackersViewController)
 		let statisticsController = StatisticsViewController()
 		let tabBarController = TabBarController()
 		
 		navigationController.tabBarItem = UITabBarItem(
-			title: "Трекеры",
+			title: NSLocalizedString("trackers", comment: "Название экрана с трекерами"),
 			image: UIImage(named: "TrackerTabBarItemImage"),
 			selectedImage: UIImage(named: "TrackerTabBarItemSelectedImage"))
 		
 		statisticsController.tabBarItem = UITabBarItem(
-			title: "Статистика",
+			title: NSLocalizedString("statistics", comment: "Название экрана статистики"),
 			image: UIImage(named: "StatisticsTabBarItemImage"),
 			selectedImage: UIImage(named: "StatisticsTabBarItemSelectedImage"))
 		
